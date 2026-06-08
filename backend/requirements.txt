@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+langgraph
+langchain-core
+openai
+supabase
+python-dotenv
+sentence-transformers
+pydantic
+pyyaml
