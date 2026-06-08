@@ -1,0 +1,284 @@
+openapi: 3.0.3
+info:
+  title: LifeRoute AI — Microsoft Copilot Connector
+  description: |
+    Custom connector for Microsoft Copilot Studio and M365 Copilot extensibility.
+    Routes patients to the best-equipped hospital based on symptoms and triage level.
+
+    **Hackathon:** AInnnovation V (Kyndryl + Microsoft) — NexGen Workplace Experience
+
+    **Tools exposed:**
+    - `navigate_care` — Full symptom-to-hospital pipeline
+    - `triage_symptoms` — Urgency assessment only
+    - `find_hospital` — Hospital routing by triage level
+    - `generate_referral` — Referral document generation
+    - `list_hospitals` — Facility directory
+  version: 1.0.0
+  contact:
+    name: LifeRoute AI Team
+    email: support@liferoute.ai
+  x-ms-applications:
+    - LifeRoute AI Healthcare Navigation
+
+servers:
+  - url: https://YOUR_NGROK_OR_DEPLOYMENT_URL
+    description: Production / demo deployment
+  - url: http://localhost:8000
+    description: Local development
+
+paths:
+  /copilot:
+    post:
+      operationId: navigateCare
+      summary: Navigate Healthcare (Copilot Chat)
+      description: |
+        Primary Copilot Studio entry point. Accepts natural-language symptoms,
+        returns Bot Framework Activity with triage, hospital recommendation,
+        and Adaptive Card attachment.
+      tags:
+        - Copilot Actions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CopilotTurnRequest'
+      responses:
+        '200':
+          description: Bot Framework Activity response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BotActivity'
+        '400':
+          description: Invalid request
+
+  /copilot/invoke:
+    post:
+      operationId: invokeCopilotTool
+      summary: Invoke Copilot Agent Tool
+      description: |
+        Execute a specific LifeRoute AI agent tool by name.
+        Used by Copilot Studio generative orchestration and declarative agents.
+      tags:
+        - Copilot Tools
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToolInvokeRequest'
+      responses:
+        '200':
+          description: Tool execution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolInvokeResponse'
+
+  /copilot/tools:
+    get:
+      operationId: listCopilotTools
+      summary: List Copilot Agent Tools
+      description: Returns declarative tool definitions for Copilot agent registration.
+      tags:
+        - Copilot Tools
+      responses:
+        '200':
+          description: Tool catalog
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolCatalog'
+
+  /api/messages:
+    post:
+      operationId: botFrameworkMessages
+      summary: Bot Framework Messaging Endpoint
+      description: |
+        Standard Azure Bot Service / Copilot Studio messaging endpoint.
+        Accepts Bot Framework Activity, returns Activity response.
+      tags:
+        - Bot Framework
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BotActivityInbound'
+      responses:
+        '200':
+          description: Bot Framework Activity response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BotActivity'
+
+  /hospitals:
+    get:
+      operationId: listHospitals
+      summary: List Hospital Network
+      description: Returns all hospitals in the Delhi NCR network for map and lookup.
+      tags:
+        - Facilities
+      parameters:
+        - name: city
+          in: query
+          schema:
+            type: string
+            enum: [Delhi, Noida, Gurgaon]
+      responses:
+        '200':
+          description: Hospital list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hospitals:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Hospital'
+
+components:
+  schemas:
+    CopilotTurnRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: User message / symptom description (English or Hindi)
+          x-ms-summary: Symptoms
+        conversation_id:
+          type: string
+          description: Copilot conversation ID for threading
+        reply_to_id:
+          type: string
+          description: Activity ID to reply to
+        latitude:
+          type: number
+          format: float
+          default: 28.6139
+        longitude:
+          type: number
+          format: float
+          default: 77.2090
+        response_format:
+          type: string
+          enum: [activity, json, tool]
+          default: activity
+
+    ToolInvokeRequest:
+      type: object
+      required:
+        - tool_name
+      properties:
+        tool_name:
+          type: string
+          enum:
+            - navigate_care
+            - triage_symptoms
+            - find_hospital
+            - generate_referral
+            - list_hospitals
+          x-ms-summary: Tool Name
+        parameters:
+          type: object
+          additionalProperties: true
+          description: Tool-specific parameters (symptoms, triage_level, city, etc.)
+
+    ToolInvokeResponse:
+      type: object
+      properties:
+        tool:
+          type: string
+        success:
+          type: boolean
+        result:
+          type: object
+
+    ToolCatalog:
+      type: object
+      properties:
+        plugin:
+          type: object
+        tools:
+          type: array
+          items:
+            type: object
+
+    BotActivityInbound:
+      type: object
+      properties:
+        type:
+          type: string
+          default: message
+        text:
+          type: string
+        conversation:
+          type: object
+          properties:
+            id:
+              type: string
+        from:
+          type: object
+        channelData:
+          type: object
+
+    BotActivity:
+      type: object
+      properties:
+        type:
+          type: string
+        text:
+          type: string
+        attachments:
+          type: array
+          items:
+            type: object
+        channelData:
+          type: object
+        conversation:
+          type: object
+
+    Hospital:
+      type: object
+      properties:
+        name:
+          type: string
+        city:
+          type: string
+        address:
+          type: string
+        distance_km:
+          type: number
+        specialties:
+          type: array
+          items:
+            type: string
+        has_icu:
+          type: boolean
+        has_cath_lab:
+          type: boolean
+        has_trauma_center:
+          type: boolean
+        available_beds:
+          type: integer
+        emergency_wait_minutes:
+          type: integer
+        rating:
+          type: number
+        contact:
+          type: string
+
+tags:
+  - name: Copilot Actions
+    description: Primary Copilot Studio conversation actions
+  - name: Copilot Tools
+    description: Declarative agent tools for orchestration
+  - name: Bot Framework
+    description: Azure Bot Service messaging protocol
+  - name: Facilities
+    description: Hospital network data
