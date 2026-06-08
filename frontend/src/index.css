@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --color-red-brand:    #E8001D;
+  --color-red-dark:     #B8001A;
+  --color-green-avail:  #00A86B;
+  --color-amber-warn:   #E8A000;
+  --color-bg:           #0A0A09;
+  --color-grey-900:     #141413;
+  --color-grey-800:     #262624;
+  --color-grey-700:     #3B3A38;
+  --color-grey-400:     #8E8D89;
+  --color-grey-200:     #C8C7C3;
+  --color-grey-100:     #E4E3E0;
+
+  --font-sans:    'DM Sans', sans-serif;
+  --font-heading: 'Syne', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --animate-sos-pulse:   sos-pulse 1.8s ease-in-out infinite;
+  --animate-badge-glow:  badge-glow 2.5s ease-in-out infinite;
+  --animate-live-dot:    live-dot 1.4s ease-in-out infinite;
+}
+
+@keyframes sos-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 0, 29, 0.55); }
+  60%       { box-shadow: 0 0 0 11px rgba(232, 0, 29, 0); }
+}
+
+@keyframes badge-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(232, 0, 29, 0.18); }
+  50%       { box-shadow: 0 0 18px rgba(232, 0, 29, 0.45); }
+}
+
+@keyframes live-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0A0A09;
+  color: #ffffff;
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+}
