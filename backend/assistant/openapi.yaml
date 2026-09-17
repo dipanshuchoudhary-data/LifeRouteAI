@@ -1,0 +1,287 @@
+openapi: 3.0.3
+info:
+  title: LifeRoute AI — Assistant Connector
+  description: |
+    Vendor-neutral connector for LLM assistants, agent frameworks, and chat UIs.
+    Routes patients to the best-equipped hospital based on symptoms and triage level.
+
+    Any client that can call HTTP endpoints or perform tool/function calling can
+    integrate — OpenAI, Anthropic, Gemini, Mistral, Llama, LangChain, LlamaIndex,
+    or a locally hosted model. No vendor SDK or account is required.
+
+    **Tools exposed:**
+    - `navigate_care` — Full symptom-to-hospital pipeline
+    - `triage_symptoms` — Urgency assessment only
+    - `find_hospital` — Hospital routing by triage level
+    - `generate_referral` — Referral document generation
+    - `list_hospitals` — Facility directory
+  version: 2.0.0
+  contact:
+    name: LifeRoute AI Team
+    email: support@liferoute.ai
+
+servers:
+  - url: https://YOUR_DEPLOYMENT_URL
+    description: Production / demo deployment
+  - url: http://localhost:8000
+    description: Local development
+
+paths:
+  /assistant/chat:
+    post:
+      operationId: assistantChat
+      summary: Assistant chat turn
+      description: |
+        Primary entry point for conversational clients. Accepts natural-language
+        symptoms and returns a message envelope containing readable text, a
+        structured result card, and machine-readable pipeline data.
+      tags:
+        - Assistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssistantTurnRequest'
+      responses:
+        '200':
+          description: Assistant message response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantMessage'
+        '400':
+          description: Invalid request
+
+  /assistant/invoke:
+    post:
+      operationId: invokeAssistantTool
+      summary: Invoke an assistant tool
+      description: |
+        Execute a specific LifeRoute AI tool by name. Use this to back
+        tool/function calls emitted by any LLM provider.
+      tags:
+        - Tools
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToolInvokeRequest'
+      responses:
+        '200':
+          description: Tool execution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolInvokeResponse'
+
+  /assistant/tools:
+    get:
+      operationId: listAssistantTools
+      summary: List assistant tools
+      description: |
+        Returns the tool catalog. Use the `format` query parameter to receive the
+        definitions pre-shaped for a specific provider.
+      tags:
+        - Tools
+      parameters:
+        - name: format
+          in: query
+          description: Tool schema dialect to return.
+          schema:
+            type: string
+            enum: [native, openai, anthropic, json-schema]
+            default: native
+      responses:
+        '200':
+          description: Tool catalog
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolCatalog'
+
+  /hospitals:
+    get:
+      operationId: listHospitals
+      summary: List hospital network
+      description: Returns all hospitals in the Delhi NCR network for map and lookup.
+      tags:
+        - Facilities
+      parameters:
+        - name: city
+          in: query
+          schema:
+            type: string
+            enum: [Delhi, Noida, Gurgaon]
+      responses:
+        '200':
+          description: Hospital list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hospitals:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Hospital'
+
+components:
+  schemas:
+    AssistantTurnRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: User message / symptom description (English or Hindi)
+        conversation_id:
+          type: string
+          description: Client-supplied conversation ID for threading
+        reply_to_id:
+          type: string
+          description: Message ID this turn replies to
+        latitude:
+          type: number
+          format: float
+          default: 28.6139
+        longitude:
+          type: number
+          format: float
+          default: 77.2090
+        response_format:
+          type: string
+          enum: [message, json, tool]
+          default: message
+
+    AssistantMessage:
+      type: object
+      properties:
+        type:
+          type: string
+        role:
+          type: string
+        text:
+          type: string
+        card:
+          $ref: '#/components/schemas/ResultCard'
+        data:
+          type: object
+        conversation_id:
+          type: string
+
+    ResultCard:
+      type: object
+      properties:
+        title:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, critical]
+        summary:
+          type: string
+        facts:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              value:
+                type: string
+        footnotes:
+          type: array
+          items:
+            type: string
+        actions:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [open_url, call]
+              label:
+                type: string
+              url:
+                type: string
+
+    ToolInvokeRequest:
+      type: object
+      required:
+        - tool_name
+      properties:
+        tool_name:
+          type: string
+          enum:
+            - navigate_care
+            - triage_symptoms
+            - find_hospital
+            - generate_referral
+            - list_hospitals
+        parameters:
+          type: object
+          additionalProperties: true
+          description: Tool-specific parameters (symptoms, triage_level, city, etc.)
+
+    ToolInvokeResponse:
+      type: object
+      properties:
+        tool:
+          type: string
+        success:
+          type: boolean
+        result:
+          type: object
+
+    ToolCatalog:
+      type: object
+      properties:
+        manifest:
+          type: object
+        format:
+          type: string
+        tools:
+          type: array
+          items:
+            type: object
+
+    Hospital:
+      type: object
+      properties:
+        name:
+          type: string
+        city:
+          type: string
+        address:
+          type: string
+        distance_km:
+          type: number
+        specialties:
+          type: array
+          items:
+            type: string
+        has_icu:
+          type: boolean
+        has_cath_lab:
+          type: boolean
+        has_trauma_center:
+          type: boolean
+        available_beds:
+          type: integer
+        emergency_wait_minutes:
+          type: integer
+        rating:
+          type: number
+        contact:
+          type: string
+
+tags:
+  - name: Assistant
+    description: Conversational entry points
+  - name: Tools
+    description: Tool definitions and execution for function-calling clients
+  - name: Facilities
+    description: Hospital network data
