@@ -1,5 +1,10 @@
+import ErrorBoundary from './components/ErrorBoundary'
 import LifeRoutePage from './pages/LifeRoutePage'
 
 export default function App() {
-  return <LifeRoutePage />
+  return (
+    <ErrorBoundary>
+      <LifeRoutePage />
+    </ErrorBoundary>
+  )
 }

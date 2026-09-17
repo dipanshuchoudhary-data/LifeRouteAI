@@ -1,6 +1,6 @@
 """
 LifeRoute AI — Pydantic Request/Response Models
-Includes Microsoft Copilot Studio / Bot Framework schemas.
+Vendor-neutral schemas shared by the REST API and assistant connector.
 """
 
 from typing import Any, Literal
@@ -29,35 +29,35 @@ class NavigateResponse(BaseModel):
     routing_reason: str
     referral_doc: str
     disclaimer: str
+    is_emergency: bool = False
+    esi_level: int | None = None
+    urgency_category: str | None = None
+    immediate_actions: list = Field(default_factory=list)
+    referral_id: str | None = None
+    fhir_bundle: dict = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
-# Microsoft Copilot / Bot Framework
+# Assistant connector
 # ---------------------------------------------------------------------------
 
 
-class CopilotTurnRequest(BaseModel):
-    """Request for POST /copilot — Copilot Studio custom connector."""
+class AssistantTurnRequest(BaseModel):
+    """Request for POST /assistant/chat — one conversational turn."""
 
     text: str = Field(..., description="User message / symptom description")
-    conversation_id: str = Field(default="", description="Copilot conversation ID")
-    reply_to_id: str = Field(default="", description="Bot Framework activity ID to reply to")
+    conversation_id: str = Field(default="", description="Client conversation ID for threading")
+    reply_to_id: str = Field(default="", description="Message ID this turn replies to")
     latitude: float = Field(default=28.6139, description="Patient latitude")
     longitude: float = Field(default=77.2090, description="Patient longitude")
-    response_format: Literal["activity", "json", "tool"] = Field(
-        default="activity",
-        description="activity=Bot Framework, json=legacy flat, tool=structured tool result",
+    response_format: Literal["message", "json", "tool"] = Field(
+        default="message",
+        description="message=envelope with card, json=flat summary, tool=tool-call result",
     )
 
 
-class CopilotRequest(CopilotTurnRequest):
-    """Backward-compatible alias."""
-
-    pass
-
-
-class CopilotResponse(BaseModel):
-    """Legacy flat JSON response (response_format=json)."""
+class AssistantChatResponse(BaseModel):
+    """Flat JSON response (response_format=json)."""
 
     type: str = "message"
     text: str = ""
@@ -67,26 +67,8 @@ class CopilotResponse(BaseModel):
     tools_used: list[str] = Field(default_factory=lambda: ["navigate_care"])
 
 
-class CopilotActivity(BaseModel):
-    type: str = "message"
-    text: str = ""
-
-
-class BotFrameworkInbound(BaseModel):
-    """Inbound Bot Framework Activity for POST /api/messages."""
-
-    type: str = Field(default="message")
-    text: str = Field(default="")
-    conversation: dict = Field(default_factory=dict)
-    from_: dict = Field(default_factory=dict, alias="from")
-    channelData: dict = Field(default_factory=dict)
-    id: str = Field(default="")
-
-    model_config = {"populate_by_name": True}
-
-
 class ToolInvokeRequest(BaseModel):
-    """Request for POST /copilot/invoke — execute a Copilot agent tool."""
+    """Request for POST /assistant/invoke — execute a tool by name."""
 
     tool_name: str = Field(
         ...,
@@ -102,7 +84,8 @@ class ToolInvokeResponse(BaseModel):
 
 
 class ToolCatalogResponse(BaseModel):
-    plugin: dict
+    manifest: dict
+    format: str = "native"
     tools: list[dict]
 
 
@@ -127,6 +110,6 @@ class HospitalRecord(BaseModel):
 class HealthResponse(BaseModel):
     status: str = "healthy"
     service: str = "LifeRoute AI"
-    version: str = "1.0.0-mvp"
-    copilot_integration: str = "microsoft-copilot-studio"
-    copilot_tools: int = 5
+    version: str = "2.0.0"
+    llm: dict = Field(default_factory=dict, description="Active LLM provider configuration")
+    tools_available: int = 5

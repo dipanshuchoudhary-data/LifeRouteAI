@@ -8,7 +8,7 @@ DISCLAIMER_TEXT = (
     "LifeRoute AI provides navigation guidance only. "
     "It is not a substitute for professional medical advice, diagnosis, or treatment. "
     "Always consult a qualified healthcare provider for medical concerns. "
-    "In case of a life-threatening emergency, call 112 (India) immediately."
+    "In case of a life-threatening emergency, call 108 (India) immediately."
 )
 
 # Words that should NOT appear in triage reasoning (diagnosis-like language)

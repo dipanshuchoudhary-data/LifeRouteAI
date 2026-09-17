@@ -7,7 +7,6 @@ export default function useHospitals(apiUrl) {
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
     fetch(`${apiUrl}/hospitals`)
       .then((r) => r.json())
       .then((data) => {

@@ -4,7 +4,6 @@ Main entry point with all API endpoints.
 Run: uvicorn main:app --reload --port 8000
 """
 
-import json
 import os
 import sys
 
@@ -22,9 +21,8 @@ from fastapi.responses import JSONResponse
 from models.schemas import (
     NavigateRequest,
     NavigateResponse,
-    CopilotTurnRequest,
-    CopilotResponse,
-    BotFrameworkInbound,
+    AssistantTurnRequest,
+    AssistantChatResponse,
     ToolInvokeRequest,
     ToolInvokeResponse,
     ToolCatalogResponse,
@@ -32,9 +30,11 @@ from models.schemas import (
 )
 from graph.pipeline import run_pipeline
 from graph.mock_data import MOCK_HOSPITALS
+from graph.llm_client import describe_provider
 from db.hospital_enrich import enrich_hospitals, enrich_hospital
-from copilot.tools import COPILOT_TOOLS, COPILOT_PLUGIN_MANIFEST
-from copilot.handler import invoke_tool, run_copilot_turn
+from assistant.tools import ASSISTANT_TOOLS, ASSISTANT_MANIFEST, get_tools_in_format
+from assistant.handler import invoke_tool, run_assistant_turn
+from api.v2.router import router as v2_router
 
 # ---------------------------------------------------------------------------
 # App setup
@@ -43,27 +43,49 @@ from copilot.handler import invoke_tool, run_copilot_turn
 app = FastAPI(
     title="LifeRoute AI",
     description=(
-        "Intelligent healthcare navigation platform with **Microsoft Copilot Studio** "
-        "integration. Exposes Copilot agent tools, Bot Framework messaging, and "
-        "OpenAPI custom connector for M365 Copilot extensibility."
+        "Intelligent healthcare navigation platform with an open assistant connector. "
+        "Any LLM provider or agent framework can drive the pipeline through REST "
+        "endpoints or tool/function calling — no vendor SDK required."
     ),
-    version="1.0.0-mvp",
+    version="2.0.0",
     openapi_tags=[
         {"name": "Navigation", "description": "Core patient navigation pipeline"},
-        {"name": "Microsoft Copilot", "description": "Copilot Studio connector & agent tools"},
-        {"name": "Bot Framework", "description": "Azure Bot Service messaging endpoint"},
+        {"name": "Assistant", "description": "Conversational entry points for any LLM client"},
+        {"name": "Tools", "description": "Tool definitions and execution for function calling"},
         {"name": "Facilities", "description": "Hospital network data"},
+        {"name": "Clinical", "description": "Streaming triage, SOS, FHIR referral, live telemetry"},
     ],
 )
 
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+def _cors_origins() -> list[str]:
+    origins = [
+        os.getenv("FRONTEND_URL", "http://localhost:5173"),
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://localhost",
+        "http://127.0.0.1",
+        "http://127.0.0.1:5173",
+    ]
+    extra = os.getenv("CORS_ORIGINS", "")
+    origins.extend(item.strip() for item in extra.split(",") if item.strip())
+    return list(dict.fromkeys(origins))
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_url, "http://localhost:5173", "http://localhost:3000"],
+    allow_origins=_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(v2_router, prefix="/api/v2", tags=["Clinical"])
+app.include_router(v2_router, prefix="/v2", tags=["Clinical"])
+
+
+def _connector_base_url() -> str:
+    return os.getenv("ASSISTANT_CONNECTOR_URL", "http://localhost:8000")
 
 
 # ---------------------------------------------------------------------------
@@ -73,8 +95,8 @@ app.add_middleware(
 
 @app.get("/health", response_model=HealthResponse, tags=["Navigation"])
 async def health_check():
-    """Health check with Copilot integration status."""
-    return HealthResponse(copilot_tools=len(COPILOT_TOOLS))
+    """Health check with active LLM provider configuration."""
+    return HealthResponse(llm=describe_provider(), tools_available=len(ASSISTANT_TOOLS))
 
 
 @app.post("/navigate", response_model=NavigateResponse, tags=["Navigation"])
@@ -93,26 +115,27 @@ async def navigate(request: NavigateRequest):
 
 
 # ---------------------------------------------------------------------------
-# Microsoft Copilot integration
+# Assistant connector
 # ---------------------------------------------------------------------------
 
 
-@app.post("/copilot", tags=["Microsoft Copilot"])
-async def copilot_connector(request: CopilotTurnRequest):
+@app.post("/assistant/chat", tags=["Assistant"])
+async def assistant_chat(request: AssistantTurnRequest):
     """
-    **Microsoft Copilot Studio custom connector entry point.**
+    **Conversational entry point for any LLM client or chat UI.**
 
-    Processes a Copilot conversation turn through the LifeRoute AI LangGraph pipeline.
-    Returns a Bot Framework Activity (default) with Adaptive Card attachment.
+    Returns a message envelope with readable text, a structured result card,
+    and machine-readable pipeline data.
 
-    Set `response_format: "json"` for legacy flat JSON (frontend widget compat).
+    Set `response_format: "json"` for a flat summary, or `"tool"` for a
+    tool-call result wrapper.
     """
     if not request.text or not request.text.strip():
         raise HTTPException(status_code=400, detail="Message text is required")
 
     try:
         location = {"lat": request.latitude, "lng": request.longitude}
-        result = await run_copilot_turn(
+        result = await run_assistant_turn(
             request.text.strip(),
             conversation_id=request.conversation_id,
             reply_to_id=request.reply_to_id,
@@ -121,74 +144,55 @@ async def copilot_connector(request: CopilotTurnRequest):
         )
 
         if request.response_format == "json":
-            return CopilotResponse(**result)
+            return AssistantChatResponse(**result)
 
         return JSONResponse(content=result)
 
     except Exception as e:
-        print(f"[API] Copilot error: {e}")
+        print(f"[API] Assistant error: {e}")
         if request.response_format == "json":
-            return CopilotResponse(
+            return AssistantChatResponse(
                 type="message",
-                text="I'm sorry, I encountered an error. Please try again or call 112 if urgent.",
+                text="I'm sorry, I encountered an error. Please try again or call 108 if urgent.",
                 disclaimer="LifeRoute AI provides navigation guidance only.",
             )
         return JSONResponse(
             content={
                 "type": "message",
-                "text": "I'm sorry, I encountered an error. Please try again or call 112 if urgent.",
-                "channelData": {"liferoute": {"error": str(e)}},
+                "role": "assistant",
+                "text": "I'm sorry, I encountered an error. Please try again or call 108 if urgent.",
+                "data": {"error": str(e)},
             }
         )
 
 
-@app.post("/api/messages", tags=["Bot Framework"])
-async def bot_framework_messages(activity: BotFrameworkInbound):
-    """
-    **Azure Bot Service / Copilot Studio messaging endpoint.**
-
-    Standard Bot Framework protocol — accepts an inbound Activity,
-    returns an outbound Activity with LifeRoute assessment + Adaptive Card.
-    """
-    text = activity.text or activity.channelData.get("text", "")
-    if not text.strip():
-        return JSONResponse(
-            content={
-                "type": "message",
-                "text": "Please describe your symptoms and I'll help find the right hospital.",
-            }
-        )
-
-    conversation_id = activity.conversation.get("id", "")
-    reply_to_id = activity.id or ""
-
-    result = await run_copilot_turn(
-        text.strip(),
-        conversation_id=conversation_id,
-        reply_to_id=reply_to_id,
-        response_format="activity",
+@app.get("/assistant/tools", response_model=ToolCatalogResponse, tags=["Tools"])
+async def list_assistant_tools(
+    format: str = Query(
+        default="native",
+        description="Tool schema dialect: native | openai | anthropic | json-schema",
     )
-    return JSONResponse(content=result)
-
-
-@app.get("/copilot/tools", response_model=ToolCatalogResponse, tags=["Microsoft Copilot"])
-async def list_copilot_tools():
+):
     """
-    **Copilot agent tool catalog.**
+    **Tool catalog for function-calling clients.**
 
-    Returns declarative tool definitions for Copilot Studio generative orchestration
-    and M365 Copilot plugin registration.
+    Pass `?format=openai` or `?format=anthropic` to receive definitions already
+    shaped for that provider's tool-calling API.
     """
-    base_url = os.getenv("COPILOT_CONNECTOR_URL", "http://localhost:8000")
-    manifest = {**COPILOT_PLUGIN_MANIFEST}
-    manifest["api"] = {"type": "openapi", "url": f"{base_url}/copilot/openapi.json"}
-    return ToolCatalogResponse(plugin=manifest, tools=COPILOT_TOOLS)
+    try:
+        tools = get_tools_in_format(format)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    manifest = {**ASSISTANT_MANIFEST}
+    manifest["api"] = {"type": "openapi", "url": f"{_connector_base_url()}/assistant/openapi.json"}
+    return ToolCatalogResponse(manifest=manifest, format=format, tools=tools)
 
 
-@app.post("/copilot/invoke", response_model=ToolInvokeResponse, tags=["Microsoft Copilot"])
-async def invoke_copilot_tool(request: ToolInvokeRequest):
+@app.post("/assistant/invoke", response_model=ToolInvokeResponse, tags=["Tools"])
+async def invoke_assistant_tool(request: ToolInvokeRequest):
     """
-    **Invoke a Copilot agent tool by name.**
+    **Invoke a tool by name.**
 
     Tools: `navigate_care`, `triage_symptoms`, `find_hospital`, `generate_referral`, `list_hospitals`
     """
@@ -196,27 +200,26 @@ async def invoke_copilot_tool(request: ToolInvokeRequest):
     return ToolInvokeResponse(**result)
 
 
-@app.get("/copilot/manifest", tags=["Microsoft Copilot"])
-async def copilot_plugin_manifest():
-    """Copilot plugin manifest for M365 Copilot extensibility registration."""
-    base_url = os.getenv("COPILOT_CONNECTOR_URL", "http://localhost:8000")
-    manifest = {**COPILOT_PLUGIN_MANIFEST}
-    manifest["api"] = {"type": "openapi", "url": f"{base_url}/copilot/openapi.json"}
+@app.get("/assistant/manifest", tags=["Tools"])
+async def assistant_manifest():
+    """Plugin manifest for assistant/agent registration."""
+    manifest = {**ASSISTANT_MANIFEST}
+    manifest["api"] = {"type": "openapi", "url": f"{_connector_base_url()}/assistant/openapi.json"}
     return manifest
 
 
-@app.get("/copilot/openapi.json", tags=["Microsoft Copilot"])
-async def copilot_openapi_spec():
+@app.get("/assistant/openapi.json", tags=["Tools"])
+async def assistant_openapi_spec():
     """
-    **OpenAPI 3.0 spec for Copilot Studio custom connector import.**
+    **OpenAPI 3.0 spec for the assistant connector.**
 
-    Import this URL in Power Platform → Custom Connectors → Create from OpenAPI.
+    Import this URL into any agent platform that consumes OpenAPI tool specs.
     """
-    spec_path = os.path.join(os.path.dirname(__file__), "copilot", "openapi.yaml")
+    spec_path = os.path.join(os.path.dirname(__file__), "assistant", "openapi.yaml")
     with open(spec_path, encoding="utf-8") as f:
         spec = yaml.safe_load(f)
 
-    connector_url = os.getenv("COPILOT_CONNECTOR_URL")
+    connector_url = os.getenv("ASSISTANT_CONNECTOR_URL")
     if connector_url:
         spec["servers"] = [{"url": connector_url, "description": "Deployed connector"}]
 
@@ -232,13 +235,9 @@ async def copilot_openapi_spec():
 async def list_hospitals(city: str | None = Query(default=None)):
     """Return hospital records, optionally filtered by city."""
     try:
-        use_mock = os.getenv("MOCK_MODE", "false").lower() == "true"
-        if use_mock:
-            hospitals = MOCK_HOSPITALS
-        else:
-            from db.supabase_client import get_all_hospitals
+        from db.hospitals import get_all_hospitals
 
-            hospitals = get_all_hospitals() or MOCK_HOSPITALS
+        hospitals = get_all_hospitals() or MOCK_HOSPITALS
 
         if city:
             hospitals = [h for h in hospitals if h.get("city") == city]
@@ -268,6 +267,12 @@ def _pipeline_to_response(result: dict, fallback_input: str) -> dict:
         "routing_reason": result.get("routing_reason", ""),
         "referral_doc": result.get("referral_doc", ""),
         "disclaimer": result.get("disclaimer", ""),
+        "is_emergency": bool(result.get("is_emergency")),
+        "esi_level": result.get("esi_level"),
+        "urgency_category": result.get("urgency_category"),
+        "immediate_actions": result.get("immediate_actions") or [],
+        "referral_id": result.get("referral_id"),
+        "fhir_bundle": result.get("fhir_bundle") or {},
     }
 
 

@@ -1,16 +1,14 @@
 """
-LifeRoute AI — Routing Agent
-Queries Supabase for best-match hospitals using semantic similarity + hard filters.
+LifeRoute routing agent — ranks the local hospital catalog.
 Always explains why it rejected closer hospitals in favor of the recommended one.
 """
 
 import os
 import sys
 
-# Add parent dirs so imports work when run as part of the backend package
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from db.supabase_client import search_hospitals, get_all_hospitals  # noqa: E402
+from db.hospitals import search_hospitals, get_all_hospitals  # noqa: E402
 from graph.mock_data import MOCK_HOSPITALS  # noqa: E402
 
 # Mapping from triage level to required hospital capabilities
@@ -111,7 +109,6 @@ def _filter_and_rank(hospitals: list[dict], symptoms: dict, triage_level: str) -
         # Compute ranking score
         score = 0
 
-        # Semantic similarity score (if available from pgvector)
         score += h.get("similarity", 0) * 40
 
         # Capacity score: lower is better
@@ -213,24 +210,10 @@ def routing_agent(state: dict) -> dict:
     symptoms = state["structured_symptoms"]
     triage_level = state["triage_level"]
 
-    # Build query for semantic search
+    # Build a specialty query for the local catalog
     query_text = _build_query_text(symptoms, triage_level)
 
-    # Try Supabase semantic search first
-    try:
-        use_mock = os.getenv("MOCK_MODE", "false").lower() == "true"
-        if use_mock:
-            raise Exception("Mock mode enabled")
-
-        hospitals = search_hospitals(query_text, triage_level)
-
-        if not hospitals or len(hospitals) == 0:
-            # Fallback to all hospitals
-            hospitals = get_all_hospitals()
-
-    except Exception as e:
-        print(f"[Routing Agent] Supabase search failed, using mock data: {e}")
-        hospitals = MOCK_HOSPITALS
+    hospitals = search_hospitals(query_text, triage_level) or get_all_hospitals() or MOCK_HOSPITALS
 
     # Filter and rank
     ranked = _filter_and_rank(hospitals, symptoms, triage_level)

@@ -13,9 +13,9 @@
   --color-grey-200:     #C8C7C3;
   --color-grey-100:     #E4E3E0;
 
-  --font-sans:    'DM Sans', sans-serif;
-  --font-heading: 'Syne', sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
+  --font-sans:    'Inter', system-ui, sans-serif;
+  --font-heading: 'Inter', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
 
   --animate-sos-pulse:   sos-pulse 1.8s ease-in-out infinite;
   --animate-badge-glow:  badge-glow 2.5s ease-in-out infinite;
@@ -50,9 +50,9 @@ html {
 }
 
 body {
-  background-color: #0A0A09;
-  color: #ffffff;
-  font-family: 'DM Sans', sans-serif;
+  background-color: #F4F6F8;
+  color: #12263A;
+  font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;

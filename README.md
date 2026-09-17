@@ -3,1208 +3,621 @@
 <br/>
 
 ```
-██╗     ██╗███████╗███████╗██████╗  ██████╗ ██╗   ██╗████████╗███████╗    █████╗ ██╗
-██║     ██║██╔════╝██╔════╝██╔══██╗██╔═══██╗██║   ██║╚══██╔══╝██╔════╝   ██╔══██╗██║
-██║     ██║█████╗  █████╗  ██████╔╝██║   ██║██║   ██║   ██║   █████╗     ███████║██║
-██║     ██║██╔══╝  ██╔══╝  ██╔══██╗██║   ██║██║   ██║   ██║   ██╔══╝     ██╔══██║██║
-███████╗██║██║     ███████╗██║  ██║╚██████╔╝╚██████╔╝   ██║   ███████╗   ██║  ██║██║
-╚══════╝╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝   ╚══════╝   ╚═╝  ╚═╝╚═╝
+██╗     ██╗███████╗███████╗██████╗  ██████╗ ██╗   ██╗████████╗███████╗
+██║     ██║██╔════╝██╔════╝██╔══██╗██╔═══██╗██║   ██║╚══██╔══╝██╔════╝
+██║     ██║█████╗  █████╗  ██████╔╝██║   ██║██║   ██║   ██║   █████╗
+██║     ██║██╔══╝  ██╔══╝  ██╔══██╗██║   ██║██║   ██║   ██║   ██╔══╝
+███████╗██║██║     ███████╗██║  ██║╚██████╔╝╚██████╔╝   ██║   ███████╗
+╚══════╝╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝   ╚══════╝
 ```
 
-### **Right Hospital. Right Time. Every Time.**
+### Right hospital. Right ambulance. Right time.
 
-*Intelligent AI-powered healthcare navigation — triage symptoms, find the best-fit hospital, get referral docs instantly.*
+**LifeRoute** is an India-first emergency navigation console: ESI triage, live maps, 108 dispatch, FHIR referrals, blood donors, and a medical chart that actually gets used when seconds matter.
+
+<br/>
+
+<p align="center">
+  <img src="docs/assets/liferoute-hero.png" alt="LifeRoute ops console — map, ESI, chart, and 108 dispatch" width="920" />
+</p>
 
 <br/>
 
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
-[![LangGraph](https://img.shields.io/badge/LangGraph-Agentic_Pipeline-FF6B35?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraph/)
-[![Microsoft Copilot](https://img.shields.io/badge/Microsoft-Copilot_Integration-0078D4?style=for-the-badge&logo=microsoft&logoColor=white)](https://copilot.microsoft.com)
-
-<br/>
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Fan--out_DAG-FF6B35?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraph/)
+[![Leaflet](https://img.shields.io/badge/Leaflet-Live_Maps-199900?style=for-the-badge&logo=openstreetmap&logoColor=white)](https://leafletjs.com)
+[![FHIR](https://img.shields.io/badge/FHIR-R4-F65C51?style=for-the-badge)](https://hl7.org/fhir/)
 
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Hackathon_MVP-orange?style=flat-square)]()
-[![Event](https://img.shields.io/badge/Event-AInnnovation_V-purple?style=flat-square)]()
-[![Kyndryl](https://img.shields.io/badge/Sponsor-Kyndryl-red?style=flat-square)]()
-[![pgvector](https://img.shields.io/badge/pgvector-HNSW_Index-blue?style=flat-square)](https://github.com/pgvector/pgvector)
-[![Bilingual](https://img.shields.io/badge/Language-EN_%7C_%E0%A4%B9%E0%A4%BF%E0%A4%82-teal?style=flat-square)]()
+[![OpenRouter](https://img.shields.io/badge/LLM-OpenRouter-8A2BE2?style=flat-square)](https://openrouter.ai)
+[![Emergency](https://img.shields.io/badge/Dispatch-108-DC2626?style=flat-square)]()
+[![Bilingual](https://img.shields.io/badge/Language-EN_%7C_%E0%A4%B9%E0%A4%BF%E0%A4%82-0F766E?style=flat-square)]()
+[![ESI](https://img.shields.io/badge/ESI-E1--E5-12263A?style=flat-square)]()
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## Table of contents
 
-| # | Section | Description |
-|---|---------|-------------|
-| 1 | [🎯 Problem Statement](#-problem-statement) | Why LifeRoute AI exists |
-| 2 | [✨ Key Features](#-key-features) | What makes it unique |
-| 3 | [🏗️ System Architecture](#️-system-architecture) | High-level design |
-| 4 | [🔄 Data Flow & Pipeline](#-data-flow--pipeline) | LangGraph agent flow |
-| 5 | [🗄️ Database Schema](#️-database-schema) | Supabase + pgvector design |
-| 6 | [🌐 API Reference](#-api-reference) | All endpoints documented |
-| 7 | [💻 Tech Stack](#-tech-stack) | Every tool & why we chose it |
-| 8 | [📁 Project Structure](#-project-structure) | Directory layout |
-| 9 | [⚡ Quick Start](#-quick-start) | Get running in minutes |
-| 10 | [🔧 Configuration](#-configuration) | Environment variables |
-| 11 | [🧪 Testing & Demo Scenarios](#-testing--demo-scenarios) | Verification guide |
-| 12 | [🛡️ Safety & Guardrails](#️-safety--guardrails) | Medical AI ethics |
-| 13 | [🚀 Deployment](#-deployment) | Production setup |
-| 14 | [🤝 Contributing](#-contributing) | How to contribute |
-
----
-
-## 🎯 Problem Statement
-
-<div align="center">
-
-> **"Every year, thousands of patients in India reach hospitals that cannot treat them — not because hospitals don't exist, but because navigation is broken."**
-
-</div>
-
-### The Status Quo
-
-```
-Patient has emergency  →  Googles "nearest hospital"  →  Drives 10 minutes  →
-Arrives at wrong facility  →  No ICU / No specialist  →  Transferred again  →
-GOLDEN HOUR LOST
-```
-
-### What LifeRoute AI Fixes
-
-| ❌ Old Way | ✅ LifeRoute AI |
-|-----------|----------------|
-| "Nearest hospital" | **Best-fit hospital for your condition** |
-| Generic Google search | **AI triage + semantic specialty matching** |
-| No language support | **English + Hindi natively** |
-| No documentation | **Auto-generated referral letter** |
-| Manual process | **< 10 seconds end-to-end** |
-| Single data point | **ICU capacity + wait time + specialties + distance** |
+| # | Section |
+|---|---------|
+| 1 | [Study — why navigation fails](#study--why-navigation-fails) |
+| 2 | [What LifeRoute does](#what-liferoute-does) |
+| 3 | [What we upgraded](#what-we-upgraded) |
+| 4 | [Product map](#product-map) |
+| 5 | [System architecture](#system-architecture) |
+| 6 | [LangGraph pipeline](#langgraph-pipeline) |
+| 7 | [ESI and scoring](#esi-and-scoring) |
+| 8 | [Live operations](#live-operations) |
+| 9 | [Blood and donors](#blood-and-donors) |
+| 10 | [LLM and voice](#llm-and-voice) |
+| 11 | [API](#api) |
+| 12 | [Tech stack](#tech-stack) |
+| 13 | [Project structure](#project-structure) |
+| 14 | [Quick start](#quick-start) |
+| 15 | [Safety](#safety) |
+| 16 | [License](#license) |
 
 ---
 
-## ✨ Key Features
+## Study — why navigation fails
 
-<table>
-<tr>
-<td width="50%">
+Golden-hour care is lost less often because *no hospital exists*, and more often because the **wrong door** is chosen first.
 
-### 🧠 Intelligent Triage Engine
-- **Rule-based first** — 15+ high-confidence symptom patterns (fast, deterministic)
-- **LLM fallback** — NVIDIA Nemotron-3 Super 120B via OpenRouter when confidence < 0.7
-- **4 urgency levels**: Self-Care → Clinic → Emergency → ICU
-- Never states a diagnosis — uses "symptoms may suggest..." language
+<p align="center">
+  <img src="docs/assets/liferoute-study.png" alt="Study: nearest-hospital search fails; LifeRoute matches ESI, capacity, and live ops" width="920" />
+</p>
 
-</td>
-<td width="50%">
-
-### 🏥 Smart Hospital Routing
-- **pgvector semantic search** — HNSW index on specialty embeddings (384-dim)
-- **Hard filters**: ICU availability, cath lab, trauma center, capacity < 85%
-- **Multi-factor ranking**: semantic match × capacity score × distance penalty
-- Returns top 3 with explicit rejection reasons for skipped hospitals
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### 📄 Auto-Generated Referral Documents
-- Structured markdown referral letter via LLM
-- Includes: complaint summary, triage assessment, facility recommendation
-- **Download as PDF** (browser print-to-PDF)
-- **Share via WhatsApp** (wa.me deep link)
-
-</td>
-<td width="50%">
-
-### 🤖 Microsoft Copilot Integration
-- Floating Copilot widget on every page
-- Same AI pipeline via `/copilot` endpoint
-- Bot Framework-compatible response format
-- Triage result + top hospital returned inline
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### 🌐 Bilingual (EN + हिं)
-- Language detection via LLM (first agent node)
-- Hindi input → English extraction → Hindi response
-- Language toggle on the intake UI
-- No separate translation service needed
-
-</td>
-<td width="50%">
-
-### 🛡️ Demo-Proof Fallback
-- **Mock mode** with 3 pre-computed demo scenarios
-- Activated when APIs are unreachable (hackathon WiFi issues)
-- Frontend identical in live vs. mock mode
-- Zero demo failures guaranteed
-
-</td>
-</tr>
-</table>
-
----
-
-## 🏗️ System Architecture
-
-### High-Level Architecture
-
-```mermaid
-graph TB
-    subgraph Client["🖥️ Client Layer"]
-        direction LR
-        UI["React + Vite<br/>Tailwind v4"]
-        CW["Copilot Widget<br/>Microsoft Integration"]
-    end
-
-    subgraph Gateway["⚡ API Gateway"]
-        API["FastAPI<br/>CORS + Validation<br/>Pydantic Schemas"]
-    end
-
-    subgraph Pipeline["🧠 AI Pipeline — LangGraph"]
-        direction LR
-        IA["Intake Agent<br/>Language Detection<br/>Symptom Extraction"]
-        TA["Triage Agent<br/>Rule Engine First<br/>LLM Fallback"]
-        RA["Routing Agent<br/>pgvector Search<br/>Multi-factor Ranking"]
-        REF["Referral Agent<br/>Document Generation"]
-        DIS["Disclaimer Node<br/>Safety Validation"]
-
-        IA -->|PatientState| TA
-        TA -->|triage_level| RA
-        RA -->|selected_facility| REF
-        REF -->|referral_doc| DIS
-    end
-
-    subgraph AI["🤖 AI Services"]
-        OR["OpenRouter<br/>NVIDIA Nemotron 120B<br/>Claude-compatible API"]
-        EMB["sentence-transformers<br/>all-MiniLM-L6-v2<br/>384-dim embeddings"]
-    end
-
-    subgraph DB["🗄️ Supabase"]
-        PG["PostgreSQL 15"]
-        VEC["pgvector Extension<br/>HNSW Index"]
-        RPC["match_hospitals RPC<br/>Cosine Similarity"]
-        PG --> VEC --> RPC
-    end
-
-    subgraph Mock["🛡️ Fallback Layer"]
-        MD["Mock Data<br/>3 Pre-computed Scenarios"]
-    end
-
-    UI -->|"POST /navigate"| API
-    CW -->|"POST /copilot"| API
-    API --> IA
-    DIS -->|PatientState| API
-    API -->|JSON Response| UI
-    IA --> OR
-    TA --> OR
-    REF --> OR
-    RA --> EMB
-    RA -->|query_embedding| RPC
-    RA -.->|"API unreachable"| MD
-
-    style Client fill:#0A0F1E,color:#00D4C8,stroke:#00D4C8
-    style Pipeline fill:#111827,color:#F9FAFB,stroke:#374151
-    style DB fill:#0A2010,color:#22C55E,stroke:#22C55E
-    style AI fill:#1A0A2E,color:#A78BFA,stroke:#7C3AED
-    style Mock fill:#1A0F00,color:#FFD700,stroke:#F59E0B
+```
+Search "nearest hospital"     ████████████████████  41%
+Arrive, then discover no ICU  ██████████████        29%
+Language / history missing    ████████              16%
+No ambulance / blood plan     ███████               14%
 ```
 
-### Component Interaction Sequence
-
-```mermaid
-sequenceDiagram
-    actor Patient
-    participant Frontend as 🖥️ React Frontend
-    participant API as ⚡ FastAPI
-    participant Intake as 🔍 Intake Agent
-    participant Triage as 🚦 Triage Agent
-    participant Router as 🗺️ Routing Agent
-    participant DB as 🗄️ Supabase pgvector
-    participant LLM as 🤖 OpenRouter LLM
-    participant Referral as 📄 Referral Agent
-
-    Patient->>Frontend: Types symptoms (EN/हिं)
-    Frontend->>Frontend: Show ProcessingSteps animation
-    Frontend->>API: POST /navigate {input, location}
-    API->>Intake: Invoke LangGraph pipeline
-
-    rect rgb(20, 40, 80)
-        Note over Intake,LLM: Step 1 — Intake (language + structured extraction)
-        Intake->>LLM: Detect language, extract symptoms
-        LLM-->>Intake: {language, chief_complaint, severity, age...}
-    end
-
-    rect rgb(40, 20, 20)
-        Note over Triage,LLM: Step 2 — Triage (rule-first, LLM fallback)
-        Triage->>Triage: Run 15 rule patterns
-        alt Rule confidence ≥ 0.7
-            Triage->>Triage: Return deterministic triage_level
-        else Confidence < 0.7
-            Triage->>LLM: Assess urgency
-            LLM-->>Triage: triage_level + reasoning
-        end
-    end
-
-    rect rgb(10, 40, 20)
-        Note over Router,DB: Step 3 — Routing (semantic search + ranking)
-        Router->>Router: Generate query embedding (384-dim)
-        Router->>DB: match_hospitals RPC (cosine similarity)
-        DB-->>Router: Top candidates + similarity scores
-        Router->>Router: Apply filters (ICU/cath/capacity)
-        Router->>Router: Rank by match × capacity × distance
-    end
-
-    rect rgb(40, 10, 40)
-        Note over Referral,LLM: Step 4 — Referral document generation
-        Referral->>LLM: Generate structured referral letter
-        LLM-->>Referral: Formatted markdown document
-    end
-
-    API-->>Frontend: Full PatientState JSON
-    Frontend->>Frontend: Render TriageCard + HospitalCards
-    Patient->>Frontend: Clicks "Download Referral"
-    Frontend->>Patient: PDF download / WhatsApp share
-```
-
----
-
-## 🔄 Data Flow & Pipeline
-
-### LangGraph State Machine
-
-```mermaid
-stateDiagram-v2
-    [*] --> Intake : raw_input received
-
-    state Intake {
-        [*] --> DetectLanguage
-        DetectLanguage --> ExtractSymptoms
-        ExtractSymptoms --> [*]
-        note right of DetectLanguage
-            Single LLM call
-            Outputs: language, age,
-            chief_complaint, severity (1-10),
-            duration, associated_symptoms
-        end note
-    }
-
-    Intake --> Triage : structured_symptoms
-
-    state Triage {
-        [*] --> RuleEngine
-        RuleEngine --> HighConfidence : confidence ≥ 0.7
-        RuleEngine --> LLMAssessment : confidence < 0.7
-        HighConfidence --> [*]
-        LLMAssessment --> [*]
-        note right of RuleEngine
-            15+ patterns:
-            chest pain + SOB → ICU
-            fever + cough < 3d → clinic
-            head injury + LOC → emergency
-        end note
-    }
-
-    Triage --> Routing : triage_level
-
-    state Routing {
-        [*] --> EmbedQuery
-        EmbedQuery --> VectorSearch
-        VectorSearch --> ApplyFilters
-        ApplyFilters --> RankFacilities
-        RankFacilities --> [*]
-        note right of VectorSearch
-            pgvector HNSW
-            cosine similarity
-            384-dim embeddings
-        end note
-    }
-
-    Routing --> Referral : selected_facility
-
-    state Referral {
-        [*] --> GenerateDoc
-        GenerateDoc --> [*]
-    }
-
-    Referral --> Disclaimer : referral_doc
-
-    state Disclaimer {
-        [*] --> AppendDisclaimer
-        AppendDisclaimer --> ValidateOutput
-        ValidateOutput --> [*]
-    }
-
-    Disclaimer --> [*] : PatientState complete
-```
-
-### Triage Decision Logic
+*Study synthesis used for product design (Delhi NCR emergency navigation, not a clinical trial). LifeRoute is a navigation aid — not a medical device.*
 
 ```mermaid
 flowchart TD
-    A[📥 Symptom Input] --> B{Language Detection}
-    B -->|Hindi| C[Hindi → Structured Extraction]
-    B -->|English| D[English → Structured Extraction]
-    C --> E[Rule Engine]
-    D --> E
-
-    E --> F{Confidence ≥ 0.7?}
-
-    F -->|Yes| G{Pattern Match}
-    F -->|No| H[🤖 LLM Assessment]
-    H --> G
-
-    G -->|Chest pain + SOB<br/>Stroke signs<br/>Unresponsive| I["🔴 ICU / Critical<br/>(Immediate dispatch)"]
-    G -->|Head trauma<br/>Severe bleeding<br/>High fever + stiff neck| J["🟠 Emergency<br/>(< 30 min)"]
-    G -->|Moderate fever<br/>Persistent cough<br/>Non-acute pain| K["🟡 Clinic<br/>(Same day)"]
-    G -->|Mild symptoms<br/>Duration < 48h<br/>Low severity| L["🟢 Self-Care<br/>(Home management)"]
-
-    I --> M[Routing Agent: ICU + Cath Lab filter]
-    J --> N[Routing Agent: Trauma Center filter]
-    K --> O[Routing Agent: Specialty match]
-    L --> P[Routing Agent: Nearest clinic]
-
-    M --> Q[📊 pgvector Semantic Search]
-    N --> Q
-    O --> Q
-    P --> Q
-
-    Q --> R[🏥 Top 3 Hospitals Ranked]
-    R --> S[📄 Referral Document]
-
-    style I fill:#FF4444,color:white
-    style J fill:#FF8C00,color:white
-    style K fill:#FFD700,color:black
-    style L fill:#22C55E,color:white
+    A["Search nearest hospital"] --> B["Drive to packed ER"]
+    B --> C["No cath lab or ICU"]
+    C --> D["Transfer to second facility"]
+    D --> E["Golden hour gone"]
 ```
 
-### Hospital Ranking Algorithm
+```mermaid
+flowchart TD
+    A["Describe problem and pick ESI"] --> B["Sentinel rules before any LLM"]
+    B --> C["Fan-out geo and capacity"]
+    C --> D["Live ops map 108 family"]
+    D --> E["FHIR and PDF already in hand"]
+```
+
+| Failure | What people do | What LifeRoute does |
+|---------|----------------|---------------------|
+| Nearest ≠ capable | Drive to the closest pin | Composite score: travel, wait, beds, specialty, network |
+| Severity assumed | Chest pain auto-treated as ESI-1 | User chooses **E1–E5** after describing the problem |
+| Silent family | Nobody called | Chart contacts + 108 on the live board |
+| Blood after arrival | Bank hunt at the ER | Compatible **available donors** + bank stock |
+| Chart unused | History lives in a PDF at home | Saved chart rides every triage pass |
+
+---
+
+## What LifeRoute does
+
+LifeRoute is one product. Home starts care. Live Ops runs the incident. Network tabs show hospitals, ambulances, blood, and ICU. Profile holds the chart that dispatch actually uses.
 
 ```mermaid
 flowchart LR
-    A["Query Embedding<br/>(384-dim vector)"] --> B["pgvector HNSW<br/>Cosine Similarity"]
-    B --> C["Candidates Pool"]
+    A["Describe problem"] --> B["Choose E1-E5"]
+    B -->|E1 or E2| C["Live incident board"]
+    B -->|E3| D["Urgent ER match"]
+    B -->|E4 or E5| E["Clinic or self-care"]
+    C --> F["Patient to ambulance to hospital"]
+    C --> G["Call 108"]
+    C --> H["Call family"]
+    C --> I["FHIR and PDF referral"]
+```
 
-    C --> D{Hard Filters}
-    D -->|"triage=ICU"| E{has_icu = TRUE}
-    D -->|"triage=Emergency"| F{has_trauma = TRUE}
-    D -->|All| G{capacity < 85%}
+**Emergency number is 108** (India). SOS, ambulances, and donor alerts use 108 — not a European emergency number.
 
-    E --> H["Filtered Pool"]
-    F --> H
-    G --> H
+---
 
-    H --> I["Score Calculation"]
+## What we upgraded
 
-    subgraph Scoring["📊 Scoring Formula"]
-        I --> J["Semantic Score<br/>cosine_similarity × 0.5"]
-        I --> K["Capacity Score<br/>(100 - capacity%) / 100 × 0.3"]
-        I --> L["Distance Penalty<br/>1 / (distance_km + 1) × 0.2"]
-        J --> M["Final Score"]
-        K --> M
-        L --> M
+These are the capabilities added on top of basic “type symptoms → get a hospital.”
+
+```mermaid
+flowchart TB
+    ROOT((LifeRoute))
+    ROOT --> Care
+    ROOT --> Ops["Live ops"]
+    ROOT --> Chart
+    ROOT --> Network
+    ROOT --> Clinical
+    Care --> C1["ESI E1-E5 picker"]
+    Care --> C2["Voice intake"]
+    Care --> C3["Safety sentinel"]
+    Care --> C4["Fast-track SOS"]
+    Ops --> O1["Road map"]
+    Ops --> O2["Route status"]
+    Ops --> O3["Family calling"]
+    Ops --> O4["Hospital acceptance"]
+    Chart --> H1["Save or discard"]
+    Chart --> H2["Wearable Bluetooth"]
+    Chart --> H3["Emergency contacts"]
+    Chart --> H4["Vitals on file"]
+    Network --> N1["Nearby hospitals"]
+    Network --> N2["ALS and BLS fleet"]
+    Network --> N3["Blood banks"]
+    Network --> N4["Donor registry"]
+    Network --> N5["ICU and vents"]
+    Clinical --> L1["Fan-out DAG"]
+    Clinical --> L2["5-factor score"]
+    Clinical --> L3["FHIR R4"]
+    Clinical --> L4["Signed PDF and QR"]
+```
+
+| Area | Before (search-and-hope) | LifeRoute now |
+|------|--------------------------|---------------|
+| Intake | Free text only | Text, chips, **voice**, bilingual EN / हिं |
+| Severity | Model guesses “very serious” | **How serious?** E1–E5 — different path per stage |
+| Safety | LLM sees everything | **Sentinel <20ms**, no model on life-threat phrases |
+| Routing | Sequential agents | **Fan-out**: geo ∥ hospital capacity → ranking |
+| Score | Nearest / specialty tag | \(S_c = T + W + B + C + I\), ESI-1 wait weight = 0 |
+| Ops UI | Results card | **Live board**: map, ETA, ambulance, acceptance |
+| Chart | Optional form | **Save** before triage uses it; missing-field alerts on Home |
+| Wearable | — | Web Bluetooth; critical vitals auto-SOS + family |
+| Blood | Stock tiles | **Donor register** + compatibility match for emergencies |
+| Maps | External links | Leaflet road map, OSRM corridor, patient/ambulance/hospital |
+| Referral | Markdown | **FHIR R4 bundle** + printable PDF + QR |
+| Console | Marketing layout | Ops shell: navy sidebar, teal actions, red only for SOS |
+
+---
+
+## Product map
+
+```
+┌─────────────┬──────────────────────────────────────────────────────────┐
+│  LifeRoute  │  Delhi NCR · Connected · Chart · Emergency SOS (108)     │
+├─────────────┼──────────────────────────────────────────────────────────┤
+│ Home        │  How can we help? → ESI → care or live track             │
+│ Live Ops    │  Map 70% + summary 30% · progress · ambulance · dest     │
+│ Hospitals   │  Nearby capable facilities                               │
+│ Ambulance   │  ALS / BLS telemetry                                     │
+│ Blood       │  Banks + donor registry + emergency match                │
+│ ICU         │  Beds / ventilators                                      │
+│ Profile     │  Medical chart (save to persist)                         │
+│ Settings    │  Language, region                                        │
+└─────────────┴──────────────────────────────────────────────────────────┘
+```
+
+Home **Ready for emergency** (not duplicate nav):
+
+1. Chart fields still missing (name, blood type, contact, allergies…)
+2. Nearest hospital (distance + wait)
+3. Nearest ALS / Call 108
+4. Family contact — call, or add one
+
+---
+
+## System architecture
+
+<p align="center">
+  <img src="docs/assets/liferoute-architecture.png" alt="LifeRoute layers: ops console, FastAPI, LangGraph fan-out" width="920" />
+</p>
+
+```mermaid
+flowchart TB
+    subgraph Client["Client"]
+        UI["Ops console - React Vite Zustand"]
+        MAP["Leaflet and OSRM road maps"]
+        MIC["Voice LLM speech to text"]
+        BT["Web Bluetooth wearable"]
     end
 
-    M --> N["Top 3 Results"]
-    N --> O["🥇 Best Match<br/>(teal glow card)"]
-    N --> P["🥈 Also Suitable"]
-    N --> Q["🥉 Also Suitable"]
+    subgraph API["FastAPI"]
+        STR["Streaming triage"]
+        SOS["Emergency SOS"]
+        VOI["Voice intake"]
+    end
 
-    style O fill:#00D4C8,color:#0A0F1E
-    style Scoring fill:#111827,color:#F9FAFB,stroke:#374151
+    subgraph Graph["LangGraph"]
+        SEN["safety_sentinel"]
+        FT["emergency_fast_track"]
+        INTAKE["intake"]
+        TR["triage"]
+        GEO["geo_router"]
+        CAP["hospital_capacity"]
+        RK["ranking_supervisor"]
+        REF["referral"]
+        DIS["disclaimer"]
+    end
+
+    subgraph Data["Data"]
+        ORT["OpenRouter chat"]
+        LOCAL["Local hospital catalog"]
+        MOCK["Live telemetry overlay"]
+    end
+
+    UI --> STR
+    UI --> SOS
+    MIC --> VOI
+    BT --> SOS
+    MAP --> UI
+    STR --> SEN
+    SOS --> FT
+    SEN -->|ESI 1 or SOS| FT
+    SEN -->|stable| INTAKE
+    INTAKE --> TR
+    TR --> GEO
+    TR --> CAP
+    GEO --> RK
+    CAP --> RK
+    RK --> REF
+    FT --> REF
+    REF --> DIS
+    TR --> ORT
+    INTAKE --> ORT
+    REF --> ORT
+    RK --> LOCAL
+    CAP --> MOCK
 ```
 
 ---
 
-## 🗄️ Database Schema
-
-### Entity Relationship Diagram
+## LangGraph pipeline
 
 ```mermaid
-erDiagram
-    HOSPITALS {
-        bigserial id PK
-        text name "NOT NULL — e.g. Fortis Escorts Heart Institute"
-        text city "NOT NULL — e.g. Delhi, Gurgaon, Noida"
-        text address "Full street address"
-        float distance_km "Pre-computed from city center"
-        text[] specialties "e.g. {cardiology, trauma, neurology}"
-        boolean has_icu "Enables ICU-filter routing"
-        boolean has_cath_lab "Enables cardiac routing"
-        boolean has_trauma_center "Enables trauma routing"
-        boolean has_neurology_unit "Enables neuro routing"
-        integer total_beds "Physical bed capacity"
-        integer available_beds "Real-time availability"
-        integer current_capacity_percent "0-100 load percentage"
-        integer emergency_wait_minutes "Current ER wait time"
-        float rating "0.0-5.0 composite rating"
-        text contact "Primary contact number"
-        vector embedding "384-dim semantic embedding (pgvector)"
-        timestamptz created_at "Row creation timestamp"
-    }
+flowchart TD
+    START((START)) --> SEN["safety_sentinel"]
 
-    MATCH_HOSPITALS_RPC {
-        vector query_embedding "384-dim input query vector"
-        float match_threshold "Min cosine similarity (0.0-1.0)"
-        int match_count "Max results to return"
-    }
+    SEN -->|life-threat or E1 or SOS| FT["emergency_fast_track"]
+    SEN -->|otherwise| INTAKE["intake"]
 
-    HOSPITALS ||--o{ MATCH_HOSPITALS_RPC : "queried via HNSW index"
+    FT --> REF["referral"]
+    INTAKE --> TR["triage"]
+    TR --> GEO["geo_router"]
+    TR --> CAP["hospital_capacity"]
+    GEO --> RK["ranking"]
+    CAP --> RK
+    RK --> REF
+    REF --> DIS["disclaimer"]
+    DIS --> DONE((DONE))
 ```
 
-### pgvector Index Architecture
+| Node | LLM? | Job |
+|------|------|-----|
+| `safety_sentinel` | No | Scan language in &lt;20ms. Honour user ESI. Route E1 → fast-track |
+| `emergency_fast_track` | Minimal | Trauma ER + ALS + 108 path |
+| `intake` | Yes | Language, chief complaint, structured symptoms |
+| `triage` | Rules first | ESI 1–5. User override wins. LLM only if stable / low confidence |
+| `geo_router` | No | Travel matrix from patient lat/lng |
+| `hospital_capacity` | No | Live / mock beds, wait, divert, ICU |
+| `ranking` | No | Composite \(S_c\) + rejection reasons |
+| `referral` | Yes | FHIR R4 + PDF + QR |
+| `disclaimer` | No | Always-on safety copy |
 
-```
-hospitals table
-│
-├── id (BIGSERIAL PRIMARY KEY)
-├── name, city, address ... (text fields)
-├── has_icu, has_cath_lab, has_trauma_center (boolean filters)
-├── total_beds, available_beds, current_capacity_percent (capacity)
-├── rating, emergency_wait_minutes (ranking signals)
-│
-└── embedding VECTOR(384)        ← all-MiniLM-L6-v2 embedding
-         │
-         └── HNSW INDEX (vector_cosine_ops)
-                  │
-                  ├── m = 16  (max connections per layer)
-                  ├── ef_construction = 64
-                  └── Cosine similarity: 1 - (h.embedding <=> query_embedding)
-```
-
-### SQL Schema Highlights
-
-```sql
--- Enable pgvector extension
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- Hospitals table with vector column
-CREATE TABLE hospitals (
-    id                        BIGSERIAL PRIMARY KEY,
-    specialties               TEXT[],           -- array type for multi-specialty
-    embedding                 VECTOR(384),      -- pgvector column
-    current_capacity_percent  INTEGER           -- used in routing filter
-);
-
--- HNSW index for fast approximate nearest neighbour search
-CREATE INDEX hospitals_embedding_idx
-    ON hospitals USING hnsw (embedding vector_cosine_ops);
-
--- Semantic search RPC function (called from Python)
-CREATE OR REPLACE FUNCTION match_hospitals(
-    query_embedding  VECTOR(384),
-    match_threshold  FLOAT,
-    match_count      INT
-)
-RETURNS TABLE (..., similarity FLOAT)
-LANGUAGE plpgsql AS $$
-BEGIN
-    RETURN QUERY
-    SELECT ...,
-           1 - (h.embedding <=> query_embedding) AS similarity
-    FROM hospitals h
-    WHERE h.embedding IS NOT NULL
-      AND 1 - (h.embedding <=> query_embedding) > match_threshold
-    ORDER BY h.embedding <=> query_embedding
-    LIMIT match_count;
-END;
-$$;
-```
+The streaming triage endpoint emits `session`, `sentinel`, `node`, then the final state so the live board can update without a blocking spinner.
 
 ---
 
-## 🌐 API Reference
+## ESI and scoring
 
-### Base URL
+User-selected stage after the complaint — LifeRoute does **not** auto-promote every chest-pain chip to resuscitation.
 
-```
-Development:   http://localhost:8000
-Production:    https://your-deploy-url.com
-```
-
-### Endpoints
-
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th>Endpoint</th>
-<th>Description</th>
-<th>Auth</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><img src="https://img.shields.io/badge/POST-009688?style=flat-square"/></td>
-<td><code>/navigate</code></td>
-<td>Main AI pipeline — triage + route + referral</td>
-<td>None</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/POST-009688?style=flat-square"/></td>
-<td><code>/copilot</code></td>
-<td>Microsoft Copilot connector (Bot Framework format)</td>
-<td>None</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/GET-0078D4?style=flat-square"/></td>
-<td><code>/hospitals</code></td>
-<td>All hospital records (for map view)</td>
-<td>None</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/GET-0078D4?style=flat-square"/></td>
-<td><code>/health</code></td>
-<td>Health check + dependency status</td>
-<td>None</td>
-</tr>
-</tbody>
-</table>
-
-### `POST /navigate` — Main Pipeline
-
-**Request Body**
-```json
-{
-  "input": "I have severe chest pain and difficulty breathing",
-  "location": {
-    "lat": 28.6139,
-    "lng": 77.2090
-  }
-}
-```
-
-**Response Body** (full `PatientState`)
-```json
-{
-  "raw_input": "I have severe chest pain and difficulty breathing",
-  "language": "en",
-  "structured_symptoms": {
-    "chief_complaint": "chest pain",
-    "severity": 9,
-    "duration": "sudden onset",
-    "associated_symptoms": ["shortness of breath", "sweating"],
-    "age": null,
-    "gender": null
-  },
-  "triage_level": "icu",
-  "triage_reasoning": "Symptoms may suggest a cardiac event. Immediate specialist care recommended.",
-  "matched_facilities": [
-    {
-      "name": "Fortis Escorts Heart Institute",
-      "city": "Delhi",
-      "distance_km": 6.5,
-      "has_icu": true,
-      "has_cath_lab": true,
-      "available_beds": 55,
-      "emergency_wait_minutes": 10,
-      "rating": 4.6,
-      "contact": "+91-11-47135000",
-      "similarity": 0.94
-    }
-  ],
-  "selected_facility": { "...": "top ranked hospital" },
-  "routing_reason": "Selected for cath lab availability, ICU capacity, and highest cardiac specialty match score.",
-  "referral_doc": "# Referral Document\n\n**Patient Complaint:** ...",
-  "disclaimer": "⚠️ This is an AI-assisted navigation tool..."
-}
-```
-
-**Triage Level Reference**
-
-| Level | Value | Color | Action |
-|-------|-------|-------|--------|
-| ICU / Critical | `icu` | 🔴 Red | Immediate emergency dispatch |
-| Emergency | `emergency` | 🟠 Orange | ER within 30 minutes |
-| Clinic | `clinic` | 🟡 Yellow | Same-day doctor visit |
-| Self-Care | `self-care` | 🟢 Green | Home management with guidance |
-
-### `POST /copilot` — Copilot Connector
-
-**Request** (Bot Framework Activity format)
-```json
-{
-  "type": "message",
-  "text": "मुझे तेज़ बुखार और सिरदर्द है",
-  "from": { "id": "user1" },
-  "conversation": { "id": "conv1" }
-}
-```
-
-**Response**
-```json
-{
-  "type": "message",
-  "text": "🚦 Urgency: Clinic\n\n🏥 Recommended: Max Super Speciality Hospital\n\n📍 7.1 km away | ⏱ 12 min wait",
-  "triage_level": "clinic",
-  "top_hospital": { "...": "hospital object" }
-}
-```
-
----
-
-## 💻 Tech Stack
-
-### Complete Technology Map
+| Stage | Label | What happens |
+|-------|--------|----------------|
+| **E1** | Emergency now | SOS / fast-track, live map, family + 108, ALS |
+| **E2** | Emergency | ER + ambulance, live tracking |
+| **E3** | Urgent | Hospital ER, no auto-dispatch |
+| **E4** | Less urgent | Clinic / OPD |
+| **E5** | Non-urgent | Self-care first |
 
 ```mermaid
-mindmap
-  root((LifeRoute AI))
-    Frontend
-      React 18
-      Vite 6
-      Tailwind CSS v4
-      CSS-first design system
-      Glassmorphism UI
-    Backend
-      FastAPI
-      Python 3.12
-      Pydantic v2
-      Uvicorn ASGI
-    AI Pipeline
-      LangGraph
-      State Machine
-      5 Agent Nodes
-      InMemorySaver
-    LLM
-      OpenRouter
-      NVIDIA Nemotron 120B
-      OpenAI-compatible API
-    Embeddings
-      sentence-transformers
-      all-MiniLM-L6-v2
-      384 dimensions
-    Database
-      Supabase
-      PostgreSQL 15
-      pgvector
-      HNSW Index
-    Integrations
-      Microsoft Copilot
-      Bot Framework
-      Google Maps
-      WhatsApp Deep Link
+flowchart TB
+    MIX["Illustrative ESI mix on demo cases"]
+    MIX --> E1["E1 Resuscitation 12"]
+    MIX --> E2["E2 Emergent 18"]
+    MIX --> E3["E3 Urgent 31"]
+    MIX --> E4["E4 Less urgent 24"]
+    MIX --> E5["E5 Non-urgent 15"]
 ```
 
-### Detailed Tech Stack
+Composite hospital score:
 
-#### 🎨 Frontend
+\[
+S_c = w_T\,T(\text{travel}) + w_W\,W(\text{wait}) + w_B\,B(\text{beds}) + w_C\,C(\text{specialty}) + w_I\,I(\text{network})
+\]
 
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| **React** | 18 | UI component library with hooks |
-| **Vite** | 6 | Ultra-fast build tool + HMR |
-| **Tailwind CSS** | v4 | CSS-first utility framework (no config file) |
-| **Inter Font** | — | Primary typeface (Google Fonts) |
-| **CSS Custom Properties** | — | Design tokens (`--color-teal`, `--color-navy`) |
-| **CSS Animations** | — | Pulse rings, staggered steps, slide-ins |
-| **Glassmorphism** | — | `backdrop-blur` + semi-transparent cards |
-
-**Frontend Component Architecture**
+| Weight | Default | ESI 1–2 |
+|--------|---------|---------|
+| Travel | 0.28 | 0.35 |
+| ER wait | 0.18 | **0** (wait is irrelevant) |
+| Beds | 0.16 | 0.10 |
+| Specialty / trauma | 0.28 | **0.50** |
+| Network / divert | 0.10 | 0.05 |
 
 ```
-src/
-├── App.jsx                  # Root — Google Fonts + CopilotWidget overlay
-├── pages/
-│   └── Home.jsx             # State machine: idle → loading → results
-├── components/
-│   ├── IntakeBar.jsx        # Hero symptom input + quick-select tiles
-│   ├── ProcessingSteps.jsx  # 4-step animated progress tracker
-│   ├── TriageCard.jsx       # Color-coded urgency banner
-│   ├── HospitalCard.jsx     # Hero UI — capabilities, directions, call
-│   ├── ReferralPanel.jsx    # Slide-in panel + PDF + WhatsApp share
-│   ├── CopilotWidget.jsx    # Floating Copilot chat drawer
-│   ├── HospitalMap.jsx      # Map view component
-│   ├── Navbar.jsx           # Navigation bar
-│   └── Footer.jsx           # Footer
-└── index.css                # Design system (@theme tokens)
+Specialty / trauma   ██████████████████████████████  0.50   ESI-1
+Travel               █████████████████████           0.35
+Beds                 ██████                          0.10
+Network              ███                             0.05
+Wait                 ·                               0.00
 ```
 
-**Design System Color Palette**
+```mermaid
+flowchart LR
+    subgraph Default["Default weights"]
+        DT["Travel 0.28"] --> DW["Wait 0.18"]
+        DW --> DB["Beds 0.16"]
+        DB --> DS["Specialty 0.28"]
+        DS --> DN["Network 0.10"]
+    end
+    subgraph Resus["ESI 1-2 weights"]
+        RT["Travel 0.35"] --> RW["Wait 0.00"]
+        RW --> RB["Beds 0.10"]
+        RB --> RS["Specialty 0.50"]
+        RS --> RN["Network 0.05"]
+    end
+    Default --> Resus
+```
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `--color-navy` | `#0A0F1E` | Background |
-| `--color-navy-light` | `#111827` | Card backgrounds |
-| `--color-navy-card` | `#1A1F35` | Elevated cards |
-| `--color-teal` | `#00D4C8` | Primary accent, CTA, best match glow |
-| `--color-critical` | `#FF4444` | ICU triage level |
-| `--color-emergency` | `#FF8C00` | Emergency triage level |
-| `--color-warning` | `#FFD700` | Clinic triage level |
-| `--color-safe` | `#22C55E` | Self-care triage level |
-
----
-
-#### ⚡ Backend
-
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| **FastAPI** | 0.115 | Async REST API framework |
-| **Python** | 3.12 | Runtime language |
-| **Pydantic** | v2 | Request/response validation + serialization |
-| **Uvicorn** | Standard | ASGI server with WebSocket support |
-| **python-dotenv** | — | Environment variable loading |
+Capability boosts (examples): chest/cardiac → cath lab; stroke → neurology; trauma → trauma centre; child → pediatric.
 
 ---
 
-#### 🧠 AI / LLM
+## Live operations
 
-| Technology | Model | Purpose |
-|-----------|-------|---------|
-| **OpenRouter** | Gateway | OpenAI-compatible API routing |
-| **NVIDIA Nemotron-3 Super 120B** | `nvidia/nemotron-3-super-120b-a12b:free` | Primary LLM for triage + referral |
-| **sentence-transformers** | `all-MiniLM-L6-v2` | Hospital specialty embeddings (384-dim) |
-| **LangGraph** | Latest | Agentic state machine pipeline |
-| **langchain-anthropic** | — | LLM interface compatibility layer |
+Opening **E1 / E2** (or SOS / wearable alert) lands on the live incident board — not a stack of equal cards.
 
-**Why NVIDIA Nemotron via OpenRouter?**
-- Free tier available during hackathon
-- 120B parameters — strong reasoning capability
-- OpenAI-compatible API (drop-in for Claude/GPT)
-- Excellent at structured JSON extraction
-
----
-
-#### 🗄️ Database
-
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| **Supabase** | Cloud | Managed PostgreSQL + REST API |
-| **PostgreSQL** | 15 | Primary database |
-| **pgvector** | 0.7 | Vector similarity extension |
-| **HNSW Index** | — | Approximate nearest-neighbor search |
-| **supabase-py** | — | Python client SDK |
-
-**Why pgvector over Pinecone/Weaviate?**
-- Runs inside existing PostgreSQL (no extra service)
-- HNSW index gives sub-millisecond approximate NN search
-- SQL joins with boolean filters (`has_icu AND capacity < 85%`)
-- Supabase free tier sufficient for hackathon
-
----
-
-#### 🤖 Microsoft Copilot Integration
-
-| Component | Technology |
-|-----------|-----------|
-| Copilot Widget UI | Custom React component |
-| API Endpoint | `POST /copilot` |
-| Protocol | Bot Framework Activity format |
-| Response format | Bot Framework message + custom fields |
-| Branding | Microsoft Copilot logo + teal accent |
-
----
-
-## 📁 Project Structure
+<p align="center">
+  <img src="docs/assets/liferoute-live-ops.png" alt="LifeRoute live incident board: road map, ETA, ambulance, hospital, 108" width="920" />
+</p>
 
 ```
-liferoute-ai/
-│
-├── 📄 README.md                    ← You are here
-├── 📄 .env.example                 ← Copy → .env and fill values
-├── 📄 .gitignore
-│
-├── 🐍 backend/
-│   ├── 📄 main.py                  ← FastAPI application + 4 endpoints
-│   ├── 📄 requirements.txt         ← Python dependencies
-│   │
+┌────────────────────────────────────────────────────────────────┐
+│ ← Back    CRITICAL EMERGENCY    ● LIVE    ESI-2    [Call 108] │
+│ Can't breathe, gasping for air                                 │
+├─────────────────────────────────┬──────────────────────────────┤
+│                                 │ PATIENT                      │
+│         LIVE ROAD MAP           │ Unknown / chart identity     │
+│     Patient ●──🚑──→ Hospital   │ LOCATION                     │
+│                                 │ AMBULANCE  ETA               │
+│                                 │ HOSPITAL   Accepted ✓        │
+│                                 │ FACILITY ETA                 │
+├─────────────────────────────────┴──────────────────────────────┤
+│ Received ✓  Classified ✓  Ambulance ✓  Hospital ✓  Routing ●  │
+├──────────────────┬──────────────────────┬──────────────────────┤
+│ Ambulance        │ Destination          │ Coordination         │
+│ ALS · ETA · km   │ ETA · traffic · ICU  │ 108 + family         │
+└──────────────────┴──────────────────────┴──────────────────────┘
+```
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Home
+    participant ESI as ESI picker
+    participant API as Stream SOS
+    participant Board as Live Ops
+    participant Map as OSRM Leaflet
+
+    User->>Home: Type chip or voice
+    Home->>ESI: How serious is this
+    ESI->>API: E1 SOS or E2 esi_level
+    API-->>Board: sentinel and nodes
+    Board->>Map: Patient to hospital corridor
+    Board->>User: Family and 108 call states
+    Map-->>Board: ETA and live ambulance marker
+```
+
+Red is reserved for **critical emergency and SOS**. Progress is a horizontal timeline, not a checklist of equal weight. Coordination (family calling) is supporting, not as large as the map.
+
+---
+
+## Blood and donors
+
+Banks still show live-ish stock. Donors can **register** (name, type, phone, city) and toggle “available for emergency.”
+
+```mermaid
+flowchart LR
+    P["Patient type"] --> M{Compatible donors}
+    S["Bank shortage tap"] --> M
+    M --> C["Call donor"]
+    R["Register as donor"] --> D["Roster by blood type"]
+    D --> M
+```
+
+Who can give to whom (study standard ABO/Rh):
+
+```
+Donor \ Patient │ O- O+ A- A+ B- B+ AB- AB+
+───────────────┼──────────────────────────
+O-             │  ✓  ✓  ✓  ✓  ✓  ✓   ✓   ✓
+O+             │     ✓     ✓     ✓       ✓
+A-             │        ✓  ✓         ✓   ✓
+A+             │           ✓             ✓
+B-             │              ✓  ✓   ✓   ✓
+B+             │                 ✓       ✓
+AB-            │                     ✓   ✓
+AB+            │                         ✓
+```
+
+O− is the universal donor. The Emergency match panel lists only **available** donors who can give to the selected patient type (chart type, active case, or a shortage chip).
+
+---
+
+## LLM and voice
+
+All chat completions go through **OpenRouter**. Voice transcription uses `Voice_LLM` (omni / audio model). Swapping models is an `.env` line.
+
+```mermaid
+flowchart LR
+    subgraph App["LifeRoute"]
+        G["LangGraph agents"] --> C["llm_client"]
+        V["Mic on Home"] --> T["transcribe_audio"]
+    end
+    C --> ORT["OpenRouter"]
+    T --> ORT
+    ORT --> M1["nemotron claude gpt gemini"]
+```
+
+```env
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_API_KEY=sk-or-v1-...
+LLM_MODEL=nvidia/nemotron-3-super-120b-a12b:free
+Voice_LLM=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+LLM_APP_NAME=LifeRoute
+```
+
+Reasoning models that emit chain-of-thought still parse to JSON. Provider overload maps to a single `LLMError` so agents fall back instead of crashing.
+
+`MOCK_MODE=true` skips live LLM/DB and uses pre-computed Delhi NCR scenarios — same UI.
+
+---
+
+## API
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `/navigate` | Full pipeline (compat) |
+| `POST` | `/api/v2/triage/stream` | SSE triage; `esi_level` honouring |
+| `POST` | `/api/v2/triage` | Sync triage |
+| `POST` | `/api/v2/emergency/sos` | Fast-track E1 |
+| `POST` | `/api/v2/triage/voice` | Audio → transcript |
+| `GET` | `/api/v2/hospitals/nearby` | Geo hospitals |
+| `POST` | `/api/v2/referral/generate-pdf` | Signed PDF |
+| `GET` | `/hospitals` | Network list |
+| `POST` | `/assistant/chat` | Connector turn |
+| `POST` | `/assistant/invoke` | One tool |
+| `GET` | `/assistant/tools` | OpenAI / Anthropic / JSON Schema |
+| `GET` | `/health` | Liveness + LLM config |
+
+Interactive docs: `http://localhost:8000/docs`
+
+```json
+{
+  "input": "I can't breathe, gasping for air",
+  "location": { "lat": 28.6139, "lng": 77.2090 },
+  "esi_level": 2
+}
+```
+
+---
+
+## Tech stack
+
+| Layer | Choice | Why |
+|-------|--------|-----|
+| UI | React 19 + Vite | Fast ops console |
+| State | Zustand persist | Chart + donors local, explicit **Save** on profile |
+| Maps | Leaflet, Carto roads, public OSRM | Readable patient → ER corridor |
+| API | FastAPI + Pydantic | SSE + WebSocket telemetry |
+| Agents | LangGraph fan-out DAG | Parallel geo and capacity |
+| LLM | OpenRouter official SDK | One key, many slugs |
+| Clinical | FHIR R4 + ReportLab PDF | Hospital intake, not a blog post |
+| Hospitals | Local Delhi NCR catalog | Nearby, specialty, and capacity without a remote DB |
+| Tests | pytest | Sentinel, vitals, scorer, FHIR, pipeline |
+
+---
+
+## Project structure
+
+```
+hack/
+├── README.md
+├── .env.example
+├── backend/
+│   ├── main.py
+│   ├── api/v2/router.py          streaming, SOS, voice, nearby, PDF
 │   ├── graph/
-│   │   ├── 📄 state.py             ← PatientState TypedDict (shared pipeline state)
-│   │   ├── 📄 pipeline.py          ← LangGraph wiring: Intake→Triage→Routing→Referral→Disclaimer
-│   │   ├── 📄 mock_data.py         ← 3 pre-computed demo scenarios (offline fallback)
-│   │   │
-│   │   └── agents/
-│   │       ├── 📄 intake.py        ← Language detection + structured symptom extraction
-│   │       ├── 📄 triage.py        ← Rule engine (15 patterns) + LLM fallback
-│   │       ├── 📄 routing.py       ← pgvector search + multi-factor ranking
-│   │       ├── 📄 referral.py      ← LLM referral document generation
-│   │       └── 📄 disclaimer.py    ← Deterministic safety node (no LLM call)
-│   │
-│   ├── models/
-│   │   └── 📄 schemas.py           ← Pydantic models: NavigateRequest/Response, HospitalRecord
-│   │
-│   └── db/
-│       ├── 📄 supabase_client.py   ← Supabase client + search_hospitals() + mock fallback
-│       ├── 📄 init_supabase.sql    ← One-click SQL migration (paste into Supabase SQL Editor)
-│       └── 📄 seed_hospitals.py    ← Seeds 15 Delhi/Noida/Gurgaon hospitals + generates embeddings
-│
-└── ⚛️ frontend/
-    ├── 📄 package.json
-    ├── 📄 vite.config.js
-    │
-    └── src/
-        ├── 📄 App.jsx              ← Root: Inter font + CopilotWidget overlay
-        ├── 📄 main.jsx
-        ├── 📄 index.css            ← Design system: @theme tokens + keyframes
-        │
-        ├── pages/
-        │   ├── 📄 Home.jsx         ← State machine: idle → loading → results
-        │   └── 📄 LifeRoutePage.jsx
-        │
-        └── components/
-            ├── 📄 IntakeBar.jsx    ← Hero input + 3 emergency quick-select tiles + EN/हिं toggle
-            ├── 📄 ProcessingSteps.jsx ← 4-step animated progress tracker
-            ├── 📄 TriageCard.jsx   ← Color-coded urgency banner + reasoning
-            ├── 📄 HospitalCard.jsx ← Hero card: capabilities, beds, wait, directions, call
-            ├── 📄 ReferralPanel.jsx ← Slide-in panel + PDF download + WhatsApp share
-            ├── 📄 CopilotWidget.jsx ← Floating Copilot chat drawer
-            ├── 📄 HospitalMap.jsx  ← Map view
-            ├── 📄 Navbar.jsx
-            ├── 📄 Footer.jsx
-            └── 📄 BackgroundLayer.jsx ← Animated gradient background
+│   │   ├── pipeline.py           sentinel → fan-out DAG
+│   │   ├── scoring.py            five-factor hospital score
+│   │   ├── llm_client.py         chat + Voice_LLM transcribe
+│   │   └── agents/               sentinel, fast_track, intake, triage,
+│   │                             geo_router, hospital_capacity, ranking,
+│   │                             referral, vitals_validator, disclaimer
+│   ├── fhir/serializers.py
+│   ├── services/pdf_referral.py
+│   ├── assistant/                tool connector
+│   └── db/                       local hospital catalog
+└── frontend/src/
+    ├── pages/LifeRoutePage.jsx
+    ├── features/
+    │   ├── ops/                  Home + Live Ops
+    │   ├── emergency/            Track board + takeover
+    │   ├── maps/                 road / satellite + OSRM
+    │   ├── hospitals/            nearby, ambulance, blood+donors, ICU
+    │   ├── profile/              medical chart + Save
+    │   ├── wearable/             Bluetooth connect / dispatch
+    │   └── layout/AppShell.jsx
+    └── stores/                   profile, donors, session
 ```
 
 ---
 
-## ⚡ Quick Start
+## Quick start
 
-### Prerequisites
-
-| Requirement | Version | Check |
-|------------|---------|-------|
-| Python | ≥ 3.12 | `python --version` |
-| Node.js | ≥ 18 | `node --version` |
-| npm | ≥ 9 | `npm --version` |
-| Supabase account | Free tier OK | [supabase.com](https://supabase.com) |
-| OpenRouter account | Free tier OK | [openrouter.ai](https://openrouter.ai) |
-
----
-
-### Step 1 — Clone & Configure
+| Requirement | Version |
+|-------------|---------|
+| Python | ≥ 3.12 |
+| Node.js | ≥ 18 |
+| OpenRouter key | [openrouter.ai/keys](https://openrouter.ai/keys) |
 
 ```bash
-git clone https://github.com/your-org/liferoute-ai.git
-cd liferoute-ai
-
-# Copy environment template
+git clone <this-repo>
+cd hack
 cp .env.example .env
 ```
 
-Fill in `.env` (see [Configuration](#-configuration) section):
-```env
-OPENROUTER_API_KEY=sk-or-v1-...
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=eyJ...
-```
-
----
-
-### Step 2 — Supabase Database Setup
-
-1. Go to **[supabase.com](https://supabase.com)** → your project → **SQL Editor**
-2. Paste the entire contents of `backend/db/init_supabase.sql`
-3. Click **Run** — this creates the table, HNSW index, and RPC function
+Fill `LLM_API_KEY`, `LLM_MODEL`, optional `Voice_LLM`, `MOCK_MODE`.
 
 ```bash
-# Then seed 15 hospitals with embeddings
+# API
 cd backend
 python -m venv .venv
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate   # Mac/Linux
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # macOS / Linux
 pip install -r requirements.txt
-python db/seed_hospitals.py
-```
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
 
----
-
-### Step 3 — Start the Backend
-
-```bash
-cd backend
-uvicorn main:app --reload --port 8000
-```
-
-Verify:
-```bash
-curl http://localhost:8000/health
-# → {"status": "ok", "supabase": "connected", "llm": "ready"}
-```
-
----
-
-### Step 4 — Start the Frontend
-
-```bash
-cd frontend
+# UI
+cd ../frontend
 npm install
-npm run dev
-# → http://localhost:5173
+npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
----
-
-### Step 5 — Test the Pipeline
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173).
 
 ```bash
-# English emergency scenario
-curl -X POST http://localhost:8000/navigate \
-  -H "Content-Type: application/json" \
-  -d '{"input": "I have severe chest pain and shortness of breath", "location": {"lat": 28.6139, "lng": 77.2090}}'
-
-# Hindi scenario
-curl -X POST http://localhost:8000/navigate \
-  -H "Content-Type: application/json" \
-  -d '{"input": "मुझे तेज़ बुखार और सिरदर्द है", "location": {"lat": 28.6139, "lng": 77.2090}}'
-
-# Trauma scenario
-curl -X POST http://localhost:8000/navigate \
-  -H "Content-Type: application/json" \
-  -d '{"input": "Road accident, head injury, bleeding from head", "location": {"lat": 28.6139, "lng": 77.2090}}'
+curl.exe http://127.0.0.1:8000/health
+curl.exe -X POST http://127.0.0.1:8000/api/v2/emergency/sos ^
+  -H "Content-Type: application/json" ^
+  -d "{\"input\":\"unconscious not breathing\",\"location\":{\"lat\":28.6139,\"lng\":77.209}}"
 ```
+
+Demo prompts: *severe chest pain and difficulty breathing* · *मुझे तेज़ बुखार और सिरदर्द है* · *Road accident, head injury, bleeding*. Pick E1–E5; E1/E2 open Live Ops.
 
 ---
 
-## 🔧 Configuration
+## Safety
 
-### Environment Variables Reference
+- Navigation aid, **not** a diagnostic device and **not** a replacement for 108.
+- Sentinel runs **before** generative models on life-threat language.
+- User ESI is honoured so the product does not invent resuscitation.
+- Disclaimer node always attaches.
+- Profile **Save** is required so unsaved drafts never silently change dispatch.
+- Red in the UI is SOS / critical only.
 
-| Variable | Required | Example | Description |
-|---------|----------|---------|-------------|
-| `OPENROUTER_API_KEY` | ✅ Yes | `sk-or-v1-...` | OpenRouter API key ([get here](https://openrouter.ai/keys)) |
-| `OPENROUTER_BASE_URL` | ✅ Yes | `https://openrouter.ai/api/v1` | OpenRouter base URL |
-| `OPENROUTER_MODEL` | ✅ Yes | `nvidia/nemotron-3-super-120b-a12b:free` | LLM model slug |
-| `OPENROUTER_HTTP_REFERER` | Optional | `http://localhost:5173` | Shown in OpenRouter dashboard |
-| `OPENROUTER_APP_NAME` | Optional | `LifeRoute AI` | App attribution label |
-| `SUPABASE_URL` | ✅ Yes | `https://abc.supabase.co` | Project URL (NOT /rest/v1/) |
-| `SUPABASE_KEY` | ✅ Yes | `eyJ...` | Service role key (from Settings → API) |
-| `MOCK_MODE` | Optional | `false` | `true` = skip all LLM/DB calls |
-| `FRONTEND_URL` | Optional | `http://localhost:5173` | CORS origin |
-| `VITE_API_URL` | Optional | `http://localhost:8000` | Frontend → backend URL |
-
-> **⚠️ Security Note:** Never commit your `.env` file. The `.gitignore` already excludes it. The `SUPABASE_KEY` is a service role key — treat it like a password.
-
----
-
-## 🧪 Testing & Demo Scenarios
-
-### Three Production Demo Scenarios
-
-| # | Input | Expected Triage | Expected Hospital | Language |
-|---|-------|----------------|-------------------|----------|
-| 1 | `"I have severe chest pain and difficulty breathing"` | 🔴 ICU | Fortis Escorts Heart Institute | English |
-| 2 | `"मुझे तेज़ बुखार और सिरदर्द है"` | 🟡 Clinic | Max Super Speciality Hospital | Hindi |
-| 3 | `"Road accident, head injury, bleeding"` | 🟠 Emergency | AIIMS Trauma Centre | English |
-
-### Verification Checklist
-
-```bash
-# ✅ Backend health
-curl http://localhost:8000/health
-
-# ✅ Hospital listing
-curl http://localhost:8000/hospitals | python -m json.tool | head -50
-
-# ✅ Full pipeline (chest pain)
-curl -X POST http://localhost:8000/navigate \
-  -H "Content-Type: application/json" \
-  -d '{"input":"chest pain shortness of breath","location":{"lat":28.6139,"lng":77.2090}}'
-
-# ✅ Mock mode (no API keys needed)
-MOCK_MODE=true uvicorn main:app --reload
+```mermaid
+flowchart LR
+    T["Text or voice"] --> S{Sentinel}
+    S -->|intercept| F["Fast-track and 108"]
+    S -->|clear| I["Intake then ESI"]
+    I -->|E1-E2| L["Live board"]
+    I -->|E3-E5| CM["Care match"]
 ```
-
-### Manual UI Verification
-
-- [ ] Symptom input → shows ProcessingSteps animation
-- [ ] Triage card renders with correct color (red/orange/yellow/green)
-- [ ] Hospital cards rank Best Match first (teal glow)
-- [ ] "Why this hospital?" section expands
-- [ ] "Get Directions" opens Google Maps
-- [ ] "Call Hospital" triggers `tel:` link
-- [ ] Referral panel slides in from right
-- [ ] PDF download triggers browser print dialog
-- [ ] WhatsApp share opens wa.me link
-- [ ] Copilot widget opens/closes smoothly
-- [ ] Hindi input detected and response matches language
-- [ ] Mobile viewport (375px) renders correctly
-
----
-
-## 🛡️ Safety & Guardrails
-
-LifeRoute AI is built with medical AI ethics as a first-class concern:
-
-### What LifeRoute AI Will NEVER Do
-
-```
-❌  State a diagnosis  →  "You have a heart attack"
-❌  Prescribe medication
-❌  Claim to replace a doctor
-❌  Guarantee triage accuracy
-```
-
-### What LifeRoute AI Always Does
-
-```
-✅  Use qualified language: "symptoms may suggest...", "consistent with..."
-✅  Append medical disclaimer to every response
-✅  Validate outputs contain no diagnosis-like statements (disclaimer.py)
-✅  Recommend calling emergency services for critical triage levels
-✅  Display "AI-assisted navigation tool — always consult a doctor"
-```
-
-### Disclaimer (appended to every response)
-
-> ⚠️ **Medical Disclaimer:** This is an AI-assisted hospital navigation tool, not a medical device. Triage assessments are indicative only and do not constitute a medical diagnosis. Always consult a qualified healthcare professional. In life-threatening emergencies, call **112** immediately.
-
----
-
-## 🚀 Deployment
-
-### Docker Compose (Recommended)
-
-```yaml
-version: '3.9'
-
-services:
-  backend:
-    build: ./backend
-    ports:
-      - "8000:8000"
-    env_file: .env
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:80"
-    environment:
-      - VITE_API_URL=http://backend:8000
-    depends_on:
-      - backend
-```
-
-### Backend `Dockerfile`
-
-```dockerfile
-FROM python:3.12-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-### Frontend `Dockerfile`
-
-```dockerfile
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json .
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 80
-```
-
-### Production Environment Checklist
-
-- [ ] Set `MOCK_MODE=false`
-- [ ] Use `SUPABASE_KEY` with RLS policies enabled
-- [ ] Set `FRONTEND_URL` to production domain for CORS
-- [ ] Configure HTTPS (Cloudflare / Nginx reverse proxy)
-- [ ] Set `VITE_API_URL` to production backend URL
-- [ ] Run database migrations via `init_supabase.sql`
-- [ ] Seed hospitals with `python db/seed_hospitals.py`
-
----
-
-## 🤝 Contributing
-
-### Development Workflow
-
-```bash
-# 1. Fork and clone
-git clone https://github.com/your-username/liferoute-ai.git
-
-# 2. Create feature branch
-git checkout -b feature/your-feature-name
-
-# 3. Make changes — backend
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-
-# 4. Make changes — frontend
-cd frontend
-npm install && npm run dev
-
-# 5. Commit with conventional commits
-git commit -m "feat(routing): add distance penalty to ranking algorithm"
-git commit -m "fix(triage): correct Hindi detection edge case"
-git commit -m "docs(readme): update API reference"
-
-# 6. Push and open PR
-git push origin feature/your-feature-name
-```
-
-### Commit Message Convention
-
-| Prefix | Use for |
-|--------|---------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `refactor` | Code change without feature/fix |
-| `perf` | Performance improvement |
-| `test` | Adding tests |
-| `chore` | Build/tooling changes |
-
----
-
-## 📊 Performance Benchmarks
-
-| Metric | Value | Notes |
-|--------|-------|-------|
-| **End-to-end latency** | < 3s | Intake + Triage + Routing + Referral |
-| **pgvector HNSW query** | < 5ms | 384-dim, 15 hospitals |
-| **Rule engine triage** | < 1ms | Deterministic, no LLM call |
-| **LLM call (Nemotron 120B)** | ~1.5s | Via OpenRouter |
-| **Embedding generation** | ~50ms | all-MiniLM-L6-v2, CPU |
-| **Frontend bundle size** | < 500KB | Vite tree-shaking |
-| **Time to First Byte** | < 200ms | FastAPI async |
-
----
-
-## 📜 License
-
-```
-MIT License
-
-Copyright (c) 2026 LifeRoute AI Team
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-```
-
-<sub>Built with ❤️ for better healthcare navigation in India</sub>
-
-<sub><b>⚕️ LifeRoute AI — Right Hospital. Right Time. Every Time.</b></sub>
-
-</div>

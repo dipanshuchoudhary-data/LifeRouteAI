@@ -5,6 +5,7 @@ Uses OpenRouter (Claude via OpenAI-compatible API).
 """
 
 from graph.llm_client import chat_completion, parse_json_response
+from graph.agents.vitals_validator import validate_vitals, vitals_suggest_emergency
 
 INTAKE_PROMPT = """You are a medical intake assistant for LifeRoute AI. Your job is to extract structured symptom information from a patient's description.
 
@@ -23,7 +24,15 @@ Respond ONLY with valid JSON in this exact format:
   "severity": 1-10 integer estimate,
   "associated_symptoms": ["list", "of", "other", "symptoms"],
   "age": "patient age if mentioned or null",
-  "gender": "patient gender if mentioned or null"
+  "gender": "male" or "female" or "other" or "unknown",
+  "vitals": {
+    "heart_rate": integer or null,
+    "systolic_bp": integer or null,
+    "diastolic_bp": integer or null,
+    "oxygen_saturation": number or null,
+    "temperature_f": number or null,
+    "respiratory_rate": integer or null
+  }
 }"""
 
 
@@ -38,8 +47,12 @@ def intake_agent(state: dict) -> dict:
             max_tokens=500,
         )
         parsed = parse_json_response(result_text)
-
-        return {
+        extracted, warnings = validate_vitals(parsed.get("vitals") or {})
+        seed, seed_warnings = validate_vitals(state.get("vitals") or {})
+        vitals = {**seed, **{key: value for key, value in extracted.items() if value is not None}}
+        warnings = seed_warnings + warnings
+        vital_emergency = vitals_suggest_emergency(vitals)
+        update = {
             "language": parsed.get("language", "en"),
             "structured_symptoms": {
                 "chief_complaint": parsed.get("chief_complaint", raw_input),
@@ -47,9 +60,22 @@ def intake_agent(state: dict) -> dict:
                 "severity": parsed.get("severity", 5),
                 "associated_symptoms": parsed.get("associated_symptoms", []),
                 "age": parsed.get("age"),
-                "gender": parsed.get("gender"),
+                "gender": parsed.get("gender") or "unknown",
             },
+            "vitals": vitals,
+            "vitals_warnings": warnings,
         }
+        if vital_emergency and not state.get("is_emergency"):
+            update.update(
+                {
+                    "is_emergency": True,
+                    "emergency_trigger_reason": vital_emergency,
+                    "esi_level": 1,
+                    "urgency_category": "RED",
+                    "triage_level": "icu",
+                }
+            )
+        return update
 
     except Exception as e:
         print(f"[Intake Agent] Error: {e}")
@@ -61,6 +87,8 @@ def intake_agent(state: dict) -> dict:
                 "severity": 5,
                 "associated_symptoms": [],
                 "age": None,
-                "gender": None,
+                "gender": "unknown",
             },
+            "vitals": {},
+            "vitals_warnings": [],
         }
