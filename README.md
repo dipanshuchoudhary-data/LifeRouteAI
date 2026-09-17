@@ -2,16 +2,9 @@
 
 <br/>
 
-```
-██╗     ██╗███████╗███████╗██████╗  ██████╗ ██╗   ██╗████████╗███████╗
-██║     ██║██╔════╝██╔════╝██╔══██╗██╔═══██╗██║   ██║╚══██╔══╝██╔════╝
-██║     ██║█████╗  █████╗  ██████╔╝██║   ██║██║   ██║   ██║   █████╗
-██║     ██║██╔══╝  ██╔══╝  ██╔══██╗██║   ██║██║   ██║   ██║   ██╔══╝
-███████╗██║██║     ███████╗██║  ██║╚██████╔╝╚██████╔╝   ██║   ███████╗
-╚══════╝╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝   ╚══════╝
-```
-
-### Right hospital. Right ambulance. Right time.
+<p align="center">
+  <img src="docs/assets/liferoute-banner.png" alt="LifeRoute — Right hospital · Right ambulance · Right time" width="920" />
+</p>
 
 **LifeRoute** is an India-first emergency navigation console: ESI triage, live maps, 108 dispatch, FHIR referrals, blood donors, and a medical chart that actually gets used when seconds matter.
 
