@@ -1203,21 +1203,6 @@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 ```
 
----
-
-## 🏆 Built For
-
-<div align="center">
-
-**AInnnovation V Hackathon**
-*Presented by Kyndryl × Microsoft*
-
-[![Kyndryl](https://img.shields.io/badge/Sponsor-Kyndryl-FF0000?style=for-the-badge)](https://kyndryl.com)
-[![Microsoft](https://img.shields.io/badge/Partner-Microsoft-0078D4?style=for-the-badge&logo=microsoft)](https://microsoft.com)
-[![Azure](https://img.shields.io/badge/Cloud-Microsoft_Azure-0089D6?style=for-the-badge&logo=microsoftazure)](https://azure.microsoft.com)
-
----
-
 <sub>Built with ❤️ for better healthcare navigation in India</sub>
 
 <sub><b>⚕️ LifeRoute AI — Right Hospital. Right Time. Every Time.</b></sub>
