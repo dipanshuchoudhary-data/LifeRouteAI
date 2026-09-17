@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import RatingStars from './RatingStars'
 import AmbulanceBadge from './AmbulanceBadge'
-import SpecialtyFilter, { extractSpecialties } from './SpecialtyFilter'
+import SpecialtyFilter from './SpecialtyFilter'
+import { extractSpecialties } from '../lib/extractSpecialties'
 
 const INITIAL_LIMIT = 6
 
