@@ -7,6 +7,15 @@ NEVER states a diagnosis — only "symptoms may suggest..." language.
 import json
 
 from graph.llm_client import chat_completion, parse_json_response
+from graph.agents.safety_sentinel import ESI_TO_LEGACY, ESI_TO_URGENCY, LEGACY_TO_ESI
+
+CARE_SETTING = {
+    1: "ED_TRAUMA",
+    2: "ED_GENERAL",
+    3: "ED_GENERAL",
+    4: "PRIMARY_CLINIC",
+    5: "HOME_CARE",
+}
 
 # ---------------------------------------------------------------------------
 # Rule-based triage engine
@@ -196,22 +205,50 @@ Respond in this JSON format:
 }"""
 
 
+def _with_esi(level: str, reasoning: str, confidence: float = 0.8, esi: int | None = None) -> dict:
+    resolved = esi if esi else LEGACY_TO_ESI.get(level, 4)
+    return {
+        "triage_level": level,
+        "triage_reasoning": reasoning,
+        "esi_level": resolved,
+        "urgency_category": ESI_TO_URGENCY.get(resolved, "YELLOW"),
+        "recommended_care_setting": CARE_SETTING.get(resolved, "PRIMARY_CLINIC"),
+        "confidence_score": confidence,
+    }
+
+
 def triage_agent(state: dict) -> dict:
-    """Triage patient symptoms using rules first, Claude fallback second."""
+    """Triage patient symptoms using rules first, LLM fallback second."""
 
-    symptoms = state["structured_symptoms"]
+    user_esi = state.get("user_esi_level")
+    if user_esi:
+        esi = int(user_esi)
+        level = ESI_TO_LEGACY.get(esi, "clinic")
+        reasons = {
+            1: "You marked this as life-threatening. Immediate resuscitation-level care is being arranged.",
+            2: "You selected E2 Emergent. Matching a capable ER and ambulance without delay.",
+            3: "You selected E3 Urgent. Matching a hospital ER for care as soon as capacity allows.",
+            4: "You selected E4 Less urgent. Matching a clinic or OPD rather than emergency dispatch.",
+            5: "You selected E5 Non-urgent. Advising self-care and a nearby clinic if symptoms persist.",
+        }
+        return _with_esi(level, reasons.get(esi, "Matching care for the selected ESI stage."), 0.95, esi=esi)
 
-    # --- Step 1: Try rule-based triage ---
+    if state.get("is_emergency"):
+        return _with_esi(
+            "icu",
+            state.get("triage_reasoning")
+            or "Critical vitals or a sentinel red flag require immediate emergency care.",
+            confidence=0.99,
+        )
+
+    symptoms = state.get("structured_symptoms") or {}
+
     rule_result = _rule_based_triage(symptoms)
 
     if rule_result and rule_result[2] >= 0.7:
         level, reasoning, confidence = rule_result
-        return {
-            "triage_level": level,
-            "triage_reasoning": reasoning,
-        }
+        return _with_esi(level, reasoning, confidence)
 
-    # --- Step 2: LLM fallback for uncertain cases ---
     try:
         symptoms_text = json.dumps(symptoms, indent=2)
         result_text = chat_completion(
@@ -219,19 +256,22 @@ def triage_agent(state: dict) -> dict:
             max_tokens=400,
         )
         parsed = parse_json_response(result_text)
-
-        return {
-            "triage_level": parsed.get("triage_level", "clinic"),
-            "triage_reasoning": parsed.get(
+        level = parsed.get("triage_level", "clinic")
+        if level not in ("self-care", "clinic", "emergency", "icu"):
+            level = "clinic"
+        return _with_esi(
+            level,
+            parsed.get(
                 "reasoning",
                 "Based on the reported symptoms, a clinical evaluation is recommended.",
             ),
-        }
+            confidence=0.65,
+        )
 
     except Exception as e:
         print(f"[Triage Agent] LLM fallback error: {e}")
-        # Conservative fallback: if we can't determine, recommend clinic visit
-        return {
-            "triage_level": "clinic",
-            "triage_reasoning": "Unable to fully assess symptoms automatically. A clinic visit is recommended for proper professional evaluation.",
-        }
+        return _with_esi(
+            "clinic",
+            "Unable to fully assess symptoms automatically. A clinic visit is recommended for proper professional evaluation.",
+            confidence=0.4,
+        )
