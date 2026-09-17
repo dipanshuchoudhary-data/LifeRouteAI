@@ -1,0 +1,21 @@
+﻿--- SLIDE 1 ---
+Grand Hack IPEC | HackShastra | LifeRoute | Right Care. Right Hospital. Right Time. | Real-time emergency healthcare coordination | Team: LifeRoute | Dipanshu Choudhary ┬╖ Mawiya Manzar
+
+--- SLIDE 2 ---
+Every year, thousands of patients in India reach hospitals that cannot treat them ΓÇö not because hospitals don't exist, but because navigation is broken. | THE STATUS QUO | Emergency | Patient experiences a critical event | Search | Looks up 'nearest hospital' | Wrong Facility | Arrives at unsuitable hospital | Transferred | Moved again causing delay
+
+--- SLIDE 3 ---
+What if the emergency journey was coordinated before the patient reached the hospital? | LifeRoute turns fragmented emergency decisions into a coordinated care path ΓÇö understanding the patient, choosing where they can be treated, and preparing the right hospital before arrival. | TODAY: Nearest Hospital | Patient ΓåÆ Search "nearest hospital" ΓåÆ Travel ΓåÆ Reach facility ΓåÆ Possible mismatch ΓåÆ Transfer ΓåÆ Time lost | Reactive routing based on distance, not clinical suitability | LIFEROUTE: Safest Achievable Care Path | Patient/Wearable/Bystander ΓåÆ Understand patient ΓåÆ Assess state ΓåÆ Select care path ΓåÆ Prepare hospital ΓåÆ Stabilize/Transfer ΓåÆ Continue care | Coordinated care based on patient condition and hospital capability | LifeRoute is not a hospital finder. It is an emergency care coordination system.
+
+--- SLIDE 4 ---
+Four core innovations change the emergency journey. | 01 | Emergency Health Passport | When the patient cannot communicate, LifeRoute surfaces authorized medical context: conditions, allergies, medications and recent history. | 02 | Live Patient State | Wearable and ambulance telemetry provide continuously changing signals ΓÇö heart rate, SpO2, blood pressure, trends and symptoms. | 03 | Care-Path Routing | Instead of ΓÇ£Which hospital is closest?ΓÇ¥, LifeRoute asks where this patient can receive the safest next step in care. | Example: |  Hospital A (2.5 km, stabilization) ΓåÆ Hospital B (3 km, specialist treatment) | 04 | Hospital Pre-Arrival Coordination | Before arrival, the hospital receives patient context, live vitals and ETA so the bed, team, equipment and specialist are ready.
+
+--- SLIDE 5 ---
+Built for Real-Time Coordination | A modular backend, event-driven communication layer and intelligent care-path engine designed for low-latency emergency workflows. | DATA & INFRASTRUCTURE | INTELLIGENCE | REAL-TIME BACKEND | APPLICATION | ENGINEERING PRINCIPLES | Low Latency |  ΓÇö Real-time event propagation for emergency workflows | Selective Intelligence |  ΓÇö Deterministic logic for critical paths; AI where reasoning adds value | Context-Aware |  ΓÇö Retrieve relevant patient information instead of passing entire medical histories | Resilient Coordination |  ΓÇö Designed for changing patient state, hospital availability and routing decisions | Python ┬╖ FastAPI ┬╖ PostgreSQL ┬╖ pgvector ┬╖ Redis Streams ┬╖ WebSockets ┬╖ LangGraph ┬╖ Sentence Transformers ┬╖ React ┬╖ Docker
+
+--- SLIDE 6 ---
+Built around the people making emergency decisions. | WHO USES IT? | Patients & Families | Emergency access + Health Passport | Bystanders | Initiate emergency coordination when the patient cannot | Ambulance Teams | Live patient state + destination guidance | Hospitals & Clinicians | Pre-arrival information + readiness + structured handoff | EXPECTED IMPACT | <1 sec | Target telemetry visibility | <200 ms | Target critical API p95 latency | 100+ | Target concurrent emergency streams | Life Journey | Detection ΓåÆ Care ΓåÆ Transfer ΓåÆ Recovery
+
+--- SLIDE 7 ---
+Right Hospital. | Right Time. Every Time. | Detect |  ΓåÆ  | Coordinate |  ΓåÆ  | Treat |  ΓåÆ  | Recover | LifeRoute | Real-time emergency healthcare coordination
+
