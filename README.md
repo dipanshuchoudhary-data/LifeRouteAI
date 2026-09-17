@@ -1,17 +1,8 @@
 <div align="center">
 
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=LifeRoute&fontSize=72&fontColor=fff&animation=twinkling&fontAlignY=32&desc=Right%20hospital%20%C2%B7%20Right%20ambulance%20%C2%B7%20Right%20time&descAlignY=55&descSize=16" width="100%"/>
+
 <br/>
-
-```
-██╗     ██╗███████╗███████╗██████╗  ██████╗ ██╗   ██╗████████╗███████╗
-██║     ██║██╔════╝██╔════╝██╔══██╗██╔═══██╗██║   ██║╚══██╔══╝██╔════╝
-██║     ██║█████╗  █████╗  ██████╔╝██║   ██║██║   ██║   ██║   █████╗
-██║     ██║██╔══╝  ██╔══╝  ██╔══██╗██║   ██║██║   ██║   ██║   ██╔══╝
-███████╗██║██║     ███████╗██║  ██║╚██████╔╝╚██████╔╝   ██║   ███████╗
-╚══════╝╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝   ╚══════╝
-```
-
-### Right hospital. Right ambulance. Right time.
 
 **LifeRoute** is an India-first emergency navigation console: ESI triage, live maps, 108 dispatch, FHIR referrals, blood donors, and a medical chart that actually gets used when seconds matter.
 
