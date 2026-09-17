@@ -1,3 +1,1 @@
-"""
-LifeRoute AI — __init__ for db package
-"""
+"""Local hospital catalog package."""
