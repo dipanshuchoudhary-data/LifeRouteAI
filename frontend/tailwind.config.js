@@ -26,7 +26,7 @@ export default {
         pulseRing: 'pulseRing 2s ease-out infinite',
         checkIn: 'checkIn 0.3s ease-out forwards',
         gradientShift: 'gradientShift 6s ease infinite',
-        copilotPulse: 'copilotPulse 3s ease-out infinite',
+        assistantPulse: 'assistantPulse 3s ease-out infinite',
         stepFade: 'fadeUp 0.5s ease-out forwards',
       },
       keyframes: {
@@ -47,7 +47,7 @@ export default {
           '50%': { backgroundPosition: '100% 50%' },
           '100%': { backgroundPosition: '0% 50%' },
         },
-        copilotPulse: {
+        assistantPulse: {
           '0%': { transform: 'scale(1)', opacity: '0.5' },
           '100%': { transform: 'scale(1.6)', opacity: '0' },
         },
