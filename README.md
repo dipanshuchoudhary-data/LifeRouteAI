@@ -621,11 +621,3 @@ flowchart LR
     I -->|E1-E2| L["Live board"]
     I -->|E3-E5| CM["Care match"]
 ```
-
----
-
-## License
-
-MIT. See `LICENSE`.
-
-Call **108** if someone is unresponsive. LifeRoute helps you reach the right door faster — it does not treat the patient.
