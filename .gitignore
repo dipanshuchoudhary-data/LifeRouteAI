@@ -1,16 +1,38 @@
-# Environment
+# Environment and secrets (never deploy)
 .env
+.env.*
+!.env.example
+!.env.production.example
+!frontend/.env.production.example
+frontend/.env
+frontend/.env.local
+
+# Local / generated — not needed to deploy
+.tmp-mermaid/
+verify.txt
+*.mp4
+frontend/src/extra.md
+frontend/src/image/
+
+# Local Sathi data
+backend/data/*.db
+backend/data/*.db-journal
+backend/data/tessdata/*.traineddata
 
 # Python
 __pycache__/
 *.pyc
 *.pyo
+.pytest_cache/
 .venv/
 venv/
 env/
 *.egg-info/
 dist/
 build/
+htmlcov/
+.coverage
+coverage.xml
 
 # Node
 node_modules/
@@ -27,5 +49,5 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Sentence Transformers model cache
+# Caches
 .cache/

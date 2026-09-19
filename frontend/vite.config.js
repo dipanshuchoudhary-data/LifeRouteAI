@@ -4,18 +4,27 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  test: {
+    environment: 'node',
+  },
   server: {
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'http://127.0.0.1:8001',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            if (String(req.url || '').includes('/stream')) {
+              res.setHeader('Cache-Control', 'no-cache')
+              res.setHeader('X-Accel-Buffering', 'no')
+            }
+          })
+        },
       },
-      '/assistant': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-      '/navigate': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-      '/health': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-      '/hospitals': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+      '/assistant': { target: 'http://127.0.0.1:8001', changeOrigin: true },
+      '/navigate': { target: 'http://127.0.0.1:8001', changeOrigin: true },
+      '/hospitals': { target: 'http://127.0.0.1:8001', changeOrigin: true },
     },
   },
 })
