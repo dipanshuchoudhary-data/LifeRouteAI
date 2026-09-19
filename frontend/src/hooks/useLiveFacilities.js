@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { fetchNearbyHospitals } from '../lib/api'
 import { adaptHospital } from '../lib/triageAdapters'
 import { hospitalLatLng, DEFAULT_ORIGIN } from '../features/maps/coords'
@@ -7,13 +7,21 @@ import { HOSPITALS, BLOOD_BANKS } from '../data/liferouteData'
 const DRIVERS = ['Rajesh Kumar', 'Amit Sharma', 'Sunil Verma', 'Pradeep Singh', 'Vikram Yadav', 'Neha Joshi', 'Arjun Malik']
 const EQUIP_ALS = ['Defibrillator', 'Ventilator', 'Cardiac Monitor']
 const EQUIP_BLS = ['First Aid', 'Oxygen', 'Stretcher']
+const POLL_MS = 30000
+const TICK_MS = 8000
+
+export function canPollLiveFacilities(hidden) {
+  return hidden !== true
+}
+
+const nearbyCache = { key: '', at: 0, list: null }
 
 function jitter(seed, spread) {
   const n = Math.sin(seed * 12.9898) * 43758.5453
   return (n - Math.floor(n) - 0.5) * spread
 }
 
-function deriveAmbulances(hospitals, tick) {
+export function deriveAmbulances(hospitals, tick) {
   return hospitals.slice(0, 6).flatMap((hospital, index) => {
     const loc = hospitalLatLng(hospital)
     const count = Math.max(1, Math.min(2, hospital.ambulancesAvailable || 1))
@@ -106,14 +114,27 @@ export default function useLiveFacilities(origin = DEFAULT_ORIGIN) {
   const [tick, setTick] = useState(0)
   const [updatedAt, setUpdatedAt] = useState(new Date())
   const [live, setLive] = useState(false)
+  const lat = origin?.lat
+  const lng = origin?.lng
 
   useEffect(() => {
     let cancelled = false
+    const key = `${Number(lat).toFixed(3)},${Number(lng).toFixed(3)}`
     const load = async () => {
+      if (nearbyCache.list && nearbyCache.key === key && Date.now() - nearbyCache.at < POLL_MS) {
+        if (!cancelled) {
+          setHospitals(nearbyCache.list)
+          setLive(true)
+        }
+        return
+      }
       try {
-        const data = await fetchNearbyHospitals({ lat: origin.lat, lng: origin.lng })
+        const data = await fetchNearbyHospitals({ lat, lng })
         const list = (data?.hospitals || []).map(enrichHospital)
         if (!cancelled && list.length) {
+          nearbyCache.key = key
+          nearbyCache.at = Date.now()
+          nearbyCache.list = list
           setHospitals(list)
           setLive(true)
           setUpdatedAt(new Date())
@@ -122,29 +143,49 @@ export default function useLiveFacilities(origin = DEFAULT_ORIGIN) {
         if (!cancelled) setLive(false)
       }
     }
-    load()
-    const poll = setInterval(load, 12000)
-    const clock = setInterval(() => setTick((n) => n + 1), 4000)
-    return () => {
-      cancelled = true
+    let poll
+    let clock
+    const stopTimers = () => {
       clearInterval(poll)
       clearInterval(clock)
+      poll = undefined
+      clock = undefined
     }
-  }, [origin.lat, origin.lng])
+    const startTimers = () => {
+      if (poll || clock) return
+      load()
+      poll = setInterval(load, POLL_MS)
+      clock = setInterval(() => setTick((n) => n + 1), TICK_MS)
+    }
+    const onVisibility = () => {
+      if (typeof document !== 'undefined' && !canPollLiveFacilities(document.hidden)) {
+        stopTimers()
+        return
+      }
+      startTimers()
+    }
+    onVisibility()
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', onVisibility)
+    }
+    return () => {
+      cancelled = true
+      stopTimers()
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', onVisibility)
+      }
+    }
+  }, [lat, lng])
 
-  return {
-    hospitals,
-    ambulances: deriveAmbulances(hospitals, tick),
-    icu: deriveIcu(hospitals, tick),
-    blood: deriveBlood(tick),
-    live,
-    updatedAt,
-    tick,
-    kpis: {
-      intercepts: 12 + (tick % 9),
-      als: deriveAmbulances(hospitals, tick).filter((a) => a.type === 'ALS' && a.status === 'available').length,
-      icuFree: deriveIcu(hospitals, tick).reduce((sum, row) => sum + (row.totalICU - row.occupiedICU), 0),
-      vents: deriveIcu(hospitals, tick).reduce((sum, row) => sum + row.ventilators.available, 0),
-    },
-  }
+  const ambulances = useMemo(() => deriveAmbulances(hospitals, tick), [hospitals, tick])
+  const icu = useMemo(() => deriveIcu(hospitals, tick), [hospitals, tick])
+  const blood = useMemo(() => deriveBlood(tick), [tick])
+  const kpis = useMemo(() => ({
+    intercepts: 12 + (tick % 9),
+    als: ambulances.filter((row) => row.type === 'ALS' && row.status === 'available').length,
+    icuFree: icu.reduce((sum, row) => sum + (row.totalICU - row.occupiedICU), 0),
+    vents: icu.reduce((sum, row) => sum + row.ventilators.available, 0),
+  }), [ambulances, icu, tick])
+
+  return { hospitals, ambulances, icu, blood, live, updatedAt, tick, kpis }
 }

@@ -28,8 +28,8 @@ export default function TalkSathi({
   }, [rows, busy])
 
   return (
-    <section className="sathi-talk">
-      <div className="sathi-thread" ref={scroller} aria-live="polite">
+    <section className="sathi-talk" aria-busy={busy || undefined}>
+      <div className="sathi-thread" ref={scroller} aria-live="polite" aria-relevant="additions">
         {rows.length === 0 && (
           <div className="sathi-thread-empty">
             <h1>Talk to Sathi</h1>
@@ -49,6 +49,7 @@ export default function TalkSathi({
       {error && <p className="sathi-error">{error}</p>}
       <form
         className="sathi-composer"
+        aria-label="Send a message to Sathi"
         onSubmit={(event) => {
           event.preventDefault()
           onSend(value)
@@ -61,11 +62,17 @@ export default function TalkSathi({
           aria-label="Message to Sathi"
           disabled={busy}
         />
-        <button type="button" className={listening ? 'listening' : ''} onClick={onMic} aria-pressed={listening}>
+        <button
+          type="button"
+          className={listening ? 'listening' : ''}
+          onClick={onMic}
+          aria-pressed={listening}
+          aria-label={listening ? 'Stop voice input' : 'Start voice input'}
+        >
           <Mic size={16} />
           <span>{listening ? 'Stop' : 'Voice'}</span>
         </button>
-        <button type="submit" disabled={busy || !(value || '').trim()}>
+        <button type="submit" disabled={busy || !(value || '').trim()} aria-label="Send message">
           <Send size={15} />
           <span>Send</span>
         </button>

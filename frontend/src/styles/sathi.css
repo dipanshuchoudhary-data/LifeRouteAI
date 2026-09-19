@@ -2,7 +2,7 @@
   --sathi-bg: #F4EFE6;
   --sathi-paper: #FFFcf7;
   --sathi-ink: #2B2925;
-  --sathi-muted: #6F6A62;
+  --sathi-muted: #4F4A43;
   --sathi-line: #E6DFD2;
   --sathi-green: #1F6B57;
   --sathi-green-2: #2F8A70;
@@ -440,7 +440,7 @@
   border: 1px solid var(--sathi-line);
   background: #fff;
   color: var(--sathi-ink);
-  min-height: 42px;
+  min-height: 44px;
   padding: 0 14px;
   border-radius: 999px;
   font-weight: 700;
@@ -492,7 +492,9 @@
 }
 
 .sathi-card { padding: 18px; }
-.sathi-card h3 { margin: 0 0 8px; display: flex; align-items: center; gap: 8px; font-size: 16px; }
+.sathi-card h2,
+.sathi-card h3,
+.sathi-card-title { margin: 0 0 8px; display: flex; align-items: center; gap: 8px; font-size: 16px; }
 .sathi-muted { color: var(--sathi-muted); margin: 0; }
 
 .sathi-list { overflow: hidden; }

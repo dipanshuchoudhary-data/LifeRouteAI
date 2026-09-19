@@ -3,7 +3,7 @@
 SAFE_ERROR = "Something went wrong. Please try again."
 PROVIDER_BUSY = "Model provider is busy. Please try again later."
 SAFE_EMERGENCY_ERROR = "Help request could not be prepared. Please call 108."
-DEMO_NOTICE = "Family has been notified. Please call 108 if you need an ambulance now."
+DEMO_NOTICE = "Emergency request prepared. Family notification is simulated in this demo. Please call 108 if you need an ambulance."
 
 ALLOWED_IMAGE_MIMES = frozenset({"image/jpeg", "image/png", "image/webp", "image/gif"})
 ALLOWED_IMAGE_EXTS = frozenset({".jpg", ".jpeg", ".png", ".webp", ".gif"})

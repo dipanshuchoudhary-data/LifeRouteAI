@@ -14,6 +14,8 @@ python -m pytest
 | AssistantAction schema + injection wrapper | `tests/unit/test_assistant_schema.py` |
 | Tool allowlist | `tests/unit/test_tools.py` |
 | Auth, consent, ownership, emergency API | `tests/integration/test_sathi_api.py` |
+| Shared rate limit | `tests/unit/test_rate_limit.py` |
+| SOS hospital reuse | `tests/unit/test_emergency_hospital.py` |
 | LifeRoute sentinel / scoring / FHIR | existing `tests/unit` and `tests/integration` |
 
 AI tests check **schema, routing, authorization, and fallbacks**. They do not assert one exact LLM sentence.

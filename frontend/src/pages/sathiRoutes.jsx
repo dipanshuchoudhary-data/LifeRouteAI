@@ -1,3 +1,4 @@
+import { lazy, Suspense, useState } from 'react'
 import { Link, useNavigate, useOutletContext } from 'react-router-dom'
 import { ArrowLeft, LayoutGrid } from 'lucide-react'
 import CompanionHome from '../features/sathi/CompanionHome'
@@ -11,16 +12,18 @@ import MemoryPanel from '../features/sathi/MemoryPanel'
 import FoodPanel from '../features/sathi/FoodPanel'
 import TasksPanel from '../features/sathi/TasksPanel'
 import DigitalHelp from '../features/sathi/DigitalHelp'
-import EmergencyTrack from '../features/emergency/EmergencyTrack'
+import EmergencyAssist from '../features/sathi/EmergencyAssist'
 import SeniorSettings from '../features/sathi/SeniorSettings'
-import TriageResults from '../features/triage/components/TriageResults'
-import MedicalProfile from '../features/profile/MedicalProfile'
 import { resolveEmergency } from '../lib/api'
 import { useUiStore } from '../stores/useUiStore'
 import { useCompanionStore } from '../stores/useCompanionStore'
 import { useLifeRouteStore } from '../stores/useLifeRouteStore'
 import { useProfileStore } from '../stores/useProfileStore'
 import { PATHS, pathFor } from '../lib/paths'
+
+const EmergencyTrack = lazy(() => import('../features/emergency/EmergencyTrack'))
+const MedicalProfile = lazy(() => import('../features/profile/MedicalProfile'))
+const TriageResults = lazy(() => import('../features/triage/components/TriageResults'))
 
 function ToolsBack() {
   return (
@@ -89,7 +92,9 @@ export function HealthChartPage() {
       <Link className="sathi-btn-ghost" to={PATHS.health} style={{ marginBottom: 16, display: 'inline-flex' }}>
         <ArrowLeft size={15} /> Back to simple health
       </Link>
-      <MedicalProfile />
+      <Suspense fallback={<p className="sathi-muted" role="status">Loading health chart…</p>}>
+        <MedicalProfile />
+      </Suspense>
     </div>
   )
 }
@@ -244,24 +249,42 @@ export function SettingsPage() {
 export function EmergencyPage() {
   const { closeEmergency, setShowDetails } = useOutletContext()
   const navigate = useNavigate()
+  const [showOps, setShowOps] = useState(false)
   const result = useLifeRouteStore((s) => s.result)
   const sathiEmergency = useLifeRouteStore((s) => s.sathiEmergency)
+  const profile = useProfileStore((s) => s.profile)
+
+  const resolve = async () => {
+    if (sathiEmergency?.id) {
+      await resolveEmergency(sathiEmergency.id).catch(() => {})
+    }
+    closeEmergency()
+  }
+
+  if (showOps) {
+    return (
+      <Suspense fallback={<p className="sathi-muted" role="status">Loading hospital matching…</p>}>
+        <EmergencyTrack
+          result={result}
+          onBack={() => setShowOps(false)}
+          onOpenDetails={() => {
+            setShowDetails(true)
+            navigate(PATHS.referral)
+          }}
+          onNavigate={() => navigate(PATHS.settings)}
+        />
+      </Suspense>
+    )
+  }
 
   return (
-    <EmergencyTrack
+    <EmergencyAssist
+      emergency={sathiEmergency}
+      profile={profile}
       result={result}
+      onResolve={resolve}
+      onDetails={() => setShowOps(true)}
       onBack={closeEmergency}
-      onOpenDetails={() => {
-        setShowDetails(true)
-        navigate(PATHS.referral)
-      }}
-      onNavigate={() => navigate(PATHS.settings)}
-      onResolve={async () => {
-        if (sathiEmergency?.id) {
-          await resolveEmergency(sathiEmergency.id).catch(() => {})
-        }
-        closeEmergency()
-      }}
     />
   )
 }
@@ -273,9 +296,11 @@ export function ReferralPage() {
   return (
     <div>
       <Link className="sathi-btn-ghost" to={PATHS.emergency} style={{ marginBottom: 16, display: 'inline-flex' }}>
-        <ArrowLeft size={15} /> Back to live help
+        <ArrowLeft size={15} /> Back to emergency help
       </Link>
-      <TriageResults result={result} rawState={rawState} onClose={closeEmergency} />
+      <Suspense fallback={<p className="sathi-muted" role="status">Loading referral…</p>}>
+        <TriageResults result={result} rawState={rawState} onClose={closeEmergency} />
+      </Suspense>
     </div>
   )
 }

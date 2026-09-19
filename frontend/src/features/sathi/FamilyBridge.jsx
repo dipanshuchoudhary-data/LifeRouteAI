@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Camera, MessageSquare, Phone, Plus, ShieldAlert, Trash2, Users } from 'lucide-react'
 import { formatWhen } from '../../stores/useCompanionStore'
 import { notifyFamily } from '../../lib/api'
+import { familyCallHref, familySendReady } from '../../lib/familySend'
 
 export default function FamilyBridge({
   profile,
@@ -25,20 +26,20 @@ export default function FamilyBridge({
   const chosen = contacts.find((row) => row.id === to) || contacts[0]
 
   const call = (person) => {
-    if (!person?.phone) return
-    const href = `tel:${String(person.phone).replace(/\s/g, '')}`
+    const href = familyCallHref(person?.phone)
+    if (!href) return
     const link = document.createElement('a')
     link.href = href
     link.click()
   }
 
   const send = async () => {
-    if (!chosen) return
-    const text = draft || (photo ? 'I sent a photo.' : '')
-    if (!confirmSend) {
-      setNotice('Please confirm before sending.')
+    const ready = familySendReady({ chosen, confirmSend, draft, photo })
+    if (!ready.ok) {
+      setNotice(ready.notice)
       return
     }
+    const text = draft.trim() || (photo ? 'I sent a photo.' : '')
     try {
       const result = await notifyFamily({
         contactId: chosen.id,
@@ -52,7 +53,7 @@ export default function FamilyBridge({
         simulated: true,
       })
       setNotice(result.notice || `Message sent to ${chosen.name}.`)
-    } catch (err) {
+    } catch {
       onMessage({ to: chosen.name, text, photo })
       setNotice(`Message sent to ${chosen.name}.`)
     }

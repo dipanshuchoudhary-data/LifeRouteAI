@@ -90,6 +90,19 @@ describe('runSathiTurn', () => {
     expect(reply.text).toBe('Model provider is busy. Please try again later.')
   })
 
+  it('does not call non-stream chat after a live reply', async () => {
+    const companion = mockCompanion()
+    const { streamSathiChat, sathiChat } = await import('./api')
+    sathiChat.mockClear()
+    streamSathiChat.mockResolvedValueOnce({ reply: 'Hello. How can I help you today?' })
+    await runSathiTurn({
+      text: 'hello there',
+      profile: { name: 'Mr. Sharma', medications: [], emergencyContacts: [] },
+      companion,
+    })
+    expect(sathiChat).not.toHaveBeenCalled()
+  })
+
   it('always replies to a greeting', async () => {
     expect(fallbackTalk('hello sath', { name: 'Mr. Sharma' })).toMatch(/Hello Mr/)
     const companion = mockCompanion()

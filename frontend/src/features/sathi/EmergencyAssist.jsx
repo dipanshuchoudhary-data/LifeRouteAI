@@ -22,21 +22,28 @@ export default function EmergencyAssist({
   const hospital = emergency?.recommended_hospital || result?.matchedHospital?.name
   const state = emergency?.state || 'ASSISTANCE_ACTIVE'
   const contact = passport.emergency_contact
+  const currentIndex = STEPS.findIndex((row) => row.id === state)
 
   return (
-    <section>
+    <section aria-labelledby="sathi-emergency-title">
       <p className="sathi-banner" role="status">
-        Emergency help is active. Please call 108 now if you need urgent help.
+        Emergency request prepared. This demo does not dispatch an ambulance. Please call 108 now if you need urgent help.
       </p>
-      <h1 className="sathi-h"><ShieldAlert size={26} /> Emergency help</h1>
+      <h1 id="sathi-emergency-title" className="sathi-h"><ShieldAlert size={26} /> Emergency help</h1>
       <p className="sathi-lead">Sathi prepared a short card for helpers. You stay in control.</p>
 
-      <a className="sathi-btn-danger" href="tel:108" onClick={onCall108} style={{ width: '100%', marginBottom: 16 }}>
+      <a
+        className="sathi-btn-danger"
+        href="tel:108"
+        onClick={onCall108}
+        style={{ width: '100%', marginBottom: 16, justifyContent: 'center' }}
+        aria-label="Call 108 ambulance now"
+      >
         <Phone size={18} /> Call 108 now
       </a>
 
       <article className="sathi-card" style={{ marginBottom: 16 }}>
-        <h3><HeartPulse size={16} /> Emergency card</h3>
+        <h2 className="sathi-card-title"><HeartPulse size={16} /> Emergency card</h2>
         <p><strong>{passport.name || profile?.name || 'Name not saved'}</strong></p>
         {passport.blood_group && <p>Blood group: {passport.blood_group}</p>}
         {!!passport.allergies?.length && <p>Allergies: {passport.allergies.join(', ')}</p>}
@@ -44,7 +51,7 @@ export default function EmergencyAssist({
         {!!passport.current_medications?.length && <p>Medicines: {passport.current_medications.join(', ')}</p>}
         {contact?.name && (
           <p>
-            <Users size={14} style={{ verticalAlign: -2, marginRight: 4 }} />
+            <Users size={14} aria-hidden="true" style={{ verticalAlign: -2, marginRight: 4 }} />
             {contact.name}
             {contact.relation ? ` (${contact.relation})` : ''}
             {contact.phone ? ` · ${contact.phone}` : ''}
@@ -54,15 +61,19 @@ export default function EmergencyAssist({
       </article>
 
       <article className="sathi-card" style={{ marginBottom: 16 }}>
-        <h3>What happened</h3>
-        <ol className="sathi-steps">
-          {STEPS.map((step) => (
-            <li key={step.id} className={STEPS.findIndex((row) => row.id === state) >= STEPS.findIndex((row) => row.id === step.id) ? 'done' : ''}>
+        <h2 className="sathi-card-title">What happened</h2>
+        <ol className="sathi-steps" aria-label="Emergency progress">
+          {STEPS.map((step, index) => (
+            <li
+              key={step.id}
+              className={currentIndex >= index ? 'done' : ''}
+              aria-current={step.id === state ? 'step' : undefined}
+            >
               {step.label}
             </li>
           ))}
         </ol>
-        <p className="sathi-muted">{emergency?.notice}</p>
+        {emergency?.notice && <p className="sathi-muted">{emergency.notice}</p>}
         {emergency?.family_notification && (
           <p className="sathi-muted">{emergency.family_notification.message}</p>
         )}
@@ -70,7 +81,7 @@ export default function EmergencyAssist({
 
       {hospital && (
         <article className="sathi-card" style={{ marginBottom: 16 }}>
-          <h3><MapPin size={16} /> Nearby hospital suggestion</h3>
+          <h2 className="sathi-card-title"><MapPin size={16} /> Nearby hospital suggestion</h2>
           <p>{hospital}</p>
           <p className="sathi-muted">This is a recommended facility based on available information. It has not been booked.</p>
         </article>

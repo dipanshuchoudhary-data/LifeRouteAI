@@ -170,7 +170,7 @@ export default function CompanionHome({
 
         <section className="sathi-safe-card">
           <h2 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 8 }}><ShieldCheck size={18} /> You’re safe with Sathi</h2>
-          <p className="sathi-muted">In an emergency, Sathi matches nearby hospitals, assigns an ambulance, and notifies your family. Call 108 if you need urgent help.</p>
+          <p className="sathi-muted">In an emergency, Sathi prepares hospital matching and a family note. This demo does not dispatch an ambulance. Call 108 if you need urgent help.</p>
           <button type="button" className="sathi-btn-ghost" style={{ marginTop: 12 }} onClick={() => onOpen('safety')}>Learn more</button>
         </section>
       </aside>

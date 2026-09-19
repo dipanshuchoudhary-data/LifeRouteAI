@@ -15,4 +15,12 @@ describe('interpretSathi', () => {
     expect(parsed.intent).toBe('book')
     expect(parsed.time).toBe('21:00')
   })
+
+  it('refuses personal bookings Sathi cannot do', () => {
+    expect(interpretSathi('book an uber to the airport').intent).toBe('personal')
+  })
+
+  it('keeps family call requests on family', () => {
+    expect(interpretSathi('call my daughter Priya').intent).toBe('family')
+  })
 })

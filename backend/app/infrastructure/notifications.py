@@ -24,7 +24,7 @@ class SimulatedNotificationProvider(NotificationProvider):
             simulated=True,
             channel="demo",
             recipient=recipient,
-            message="Family has been notified.",
+            message="Family notification simulated in this demo.",
         )
 
 

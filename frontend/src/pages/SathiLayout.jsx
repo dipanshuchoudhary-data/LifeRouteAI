@@ -130,9 +130,9 @@ export default function SathiLayout() {
     const person = useProfileStore.getState().profile.emergencyContacts.find((row) => row.canEmergency !== false)
       || useProfileStore.getState().profile.emergencyContacts[0]
     logSafety({
-      title: 'Family notified',
+      title: 'Family note prepared',
       detail: person?.name
-        ? `${person.name} has been notified.`
+        ? `A family note was prepared for ${person.name}.`
         : 'Add a family phone number in Family.',
     })
     setSafetyStage('family')
