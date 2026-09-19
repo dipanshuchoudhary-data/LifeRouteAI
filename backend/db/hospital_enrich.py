@@ -20,16 +20,6 @@ HOSPITAL_COORDS = {
     "Max Super Speciality Hospital Noida": (28.5842, 77.3265),
     "Yatharth Super Speciality Hospital": (28.5356, 77.3910),
     "Kailash Hospital & Heart Institute": (28.5789, 77.3312),
-    "Apollo Hospitals Noida": (28.5748, 77.3261),
-    "Metro Hospital Noida": (28.5906, 77.3179),
-    "Felix Hospital Noida": (28.5084, 77.4092),
-    "Sharda Hospital Greater Noida": (28.4736, 77.4831),
-    "Kailash Hospital Greater Noida": (28.4743, 77.5034),
-    "Narayana Superspeciality Hospital Gurugram": (28.4946, 77.0884),
-    "CK Birla Hospital Gurugram": (28.4379, 77.0717),
-    "Manipal Hospital Gurugram": (28.4302, 77.0654),
-    "W Pratiksha Hospital Gurugram": (28.4086, 77.0703),
-    "Cloudnine Hospital Gurugram": (28.4129, 77.0481),
 }
 
 DEFAULT_COORD = (28.6139, 77.2090)
@@ -41,12 +31,9 @@ def enrich_hospital(hospital: dict) -> dict:
     name = h.get("name", "")
     hid = h.get("id") or hash(name) % 1000
 
-    lat = h.get("lat")
-    lng = h.get("lng")
-    if lat is None or lng is None:
-        lat, lng = HOSPITAL_COORDS.get(name, DEFAULT_COORD)
-    h["lat"] = float(lat)
-    h["lng"] = float(lng)
+    lat, lng = HOSPITAL_COORDS.get(name, DEFAULT_COORD)
+    h["lat"] = lat
+    h["lng"] = lng
 
     # Deterministic demo fleet data from hospital id
     base = int(hid) if isinstance(hid, int) else abs(hid) % 100

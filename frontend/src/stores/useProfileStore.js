@@ -21,42 +21,6 @@ export const EMPTY_WEARABLE = {
   lastAlertAt: 0,
 }
 
-export const DEMO_PROFILE = {
-  name: 'Mr. Sharma',
-  age: '72',
-  sex: 'male',
-  bloodType: 'B+',
-  city: 'Noida',
-  heightCm: '168',
-  weightKg: '74',
-  organDonor: false,
-  pregnant: false,
-  smoking: 'never',
-  alcohol: 'none',
-  notes: 'Prefers morning appointments. Lives in Noida Sector 62.',
-  insurances: [{ id: 'demo-ins-1', payer: 'Star Health', plan: 'Senior', memberId: 'SH-7721', cashless: true }],
-  allergies: [{ id: 'demo-al-1', substance: 'Penicillin', severity: 'Severe' }],
-  conditions: [
-    { id: 'demo-co-1', name: 'Hypertension' },
-    { id: 'demo-co-2', name: 'Type 2 Diabetes' },
-  ],
-  medications: [
-    { id: 'demo-med-1', name: 'Amlodipine', dose: '5 mg', frequency: 'Once daily' },
-    { id: 'demo-med-2', name: 'Metformin', dose: '500 mg', frequency: 'Twice daily' },
-  ],
-  emergencyContacts: [
-    { id: 'demo-priya', name: 'Priya Sharma', relation: 'Daughter', phone: '+91 98100 11223', canEmergency: true, canSafety: true, canDaily: true },
-    { id: 'demo-rahul', name: 'Rahul Sharma', relation: 'Son', phone: '+91 98200 44556', canEmergency: true, canSafety: false, canDaily: false },
-  ],
-  vitals: { ...EMPTY_VITALS },
-  wearable: {
-    status: 'connected',
-    deviceId: 'apple-watch-ultra',
-    deviceName: 'Apple Watch Ultra',
-    lastAlertAt: 0,
-  },
-}
-
 export const EMPTY_PROFILE = {
   name: '',
   age: '',
@@ -85,9 +49,7 @@ function asList(value, mapper) {
 }
 
 export function migrateProfile(raw) {
-  if (!raw || typeof raw !== 'object' || !(raw.name || '').trim()) {
-    return { ...DEMO_PROFILE, vitals: { ...EMPTY_VITALS, ...(raw?.vitals || {}) } }
-  }
+  if (!raw || typeof raw !== 'object') return { ...EMPTY_PROFILE }
   const allergies = asList(raw.allergies, (item) => {
     if (typeof item === 'string') return { id: uid(), substance: item, severity: 'Moderate' }
     return { id: item.id || uid(), substance: item.substance || '', severity: item.severity || 'Moderate' }
@@ -129,9 +91,6 @@ export function migrateProfile(raw) {
     name: item.name || '',
     relation: item.relation || '',
     phone: item.phone || '',
-    canEmergency: item.canEmergency !== false,
-    canSafety: item.canSafety !== false,
-    canDaily: Boolean(item.canDaily),
   }))
   if (!emergencyContacts.length && raw.emergencyContact?.name) {
     emergencyContacts.push({ id: uid(), ...raw.emergencyContact })
@@ -145,15 +104,14 @@ export function migrateProfile(raw) {
     insurances,
     emergencyContacts,
     vitals: { ...EMPTY_VITALS, ...(raw.vitals || {}) },
-    wearable: { ...EMPTY_WEARABLE, ...(raw.wearable || {}) },
+    wearable: { ...EMPTY_WEARABLE, ...(raw.wearable || {}), status: 'idle' },
   }
 }
 
 export const useProfileStore = create(
   persist(
     (set, get) => ({
-      profile: { ...DEMO_PROFILE },
-      loadDemoPatient: () => set({ profile: { ...DEMO_PROFILE, vitals: { ...EMPTY_VITALS } } }),
+      profile: { ...EMPTY_PROFILE },
       updateProfile: (patch) => set({ profile: { ...get().profile, ...patch } }),
       updateVitals: (patch) =>
         set({ profile: { ...get().profile, vitals: { ...get().profile.vitals, ...patch } } }),
@@ -199,7 +157,7 @@ export const useProfileStore = create(
       removeCondition: (id) =>
         set({ profile: { ...get().profile, conditions: get().profile.conditions.filter((row) => row.id !== id) } }),
       addContact: (row) =>
-        set({ profile: { ...get().profile, emergencyContacts: [...get().profile.emergencyContacts, { id: uid(), canEmergency: true, canSafety: true, canDaily: false, ...row }] } }),
+        set({ profile: { ...get().profile, emergencyContacts: [...get().profile.emergencyContacts, { id: uid(), ...row }] } }),
       removeContact: (id) =>
         set({ profile: { ...get().profile, emergencyContacts: get().profile.emergencyContacts.filter((row) => row.id !== id) } }),
       patchContact: (id, patch) =>

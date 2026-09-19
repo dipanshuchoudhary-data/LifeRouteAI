@@ -1,9 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import 'leaflet/dist/leaflet.css'
 import './styles/liferoute.css'
 import './styles/ops.css'
-import './styles/sathi.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
