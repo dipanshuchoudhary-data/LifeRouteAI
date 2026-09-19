@@ -60,7 +60,7 @@ export default function WearableConnect() {
         }
       }
     } else {
-      setHint('This browser has no Web Bluetooth. Select a device to continue the demo.')
+      setHint('This browser has no Web Bluetooth. Choose a device to continue.')
     }
     await new Promise((resolve) => setTimeout(resolve, 900))
     setDevices(found)
@@ -91,7 +91,7 @@ export default function WearableConnect() {
         <Watch size={18} />
         <div>
           <h3>Wearable</h3>
-          <p className="ops-muted">Connect a watch or band. Abnormal vitals auto-alert family and nearby ambulance.</p>
+          <p className="ops-muted">Connect a watch or band. Unusual readings first ask if you are okay, then tell family if needed. Emergency help is not started automatically.</p>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export default function WearableConnect() {
             <span>BP {profile.vitals?.systolic_bp}/{profile.vitals?.diastolic_bp}</span>
           </div>
           <div className="lr-wearable-actions">
-            <button type="button" className="ops-sos" onClick={simulateCrash}>Simulate abnormal vitals</button>
+            <button type="button" className="ops-sos" onClick={simulateCrash}>Test unusual readings</button>
             <button type="button" className="ops-btn-ghost" onClick={disconnectWearable}>
               <Unplug size={14} /> Disconnect
             </button>

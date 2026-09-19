@@ -10,5 +10,7 @@ tenacity
 reportlab
 qrcode[pil]
 pillow
+pytesseract
 pytest
 httpx
+sqlalchemy

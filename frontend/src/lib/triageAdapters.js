@@ -59,7 +59,7 @@ export function adaptHospital(hospital = {}) {
     mapsUrl: hospital.maps_url,
     lat: hospital.lat,
     lng: hospital.lng,
-    travelMinutes: hospital.travel_time_minutes,
+    travelMinutes: hospital.travel_time_minutes ?? hospital.travelMinutes,
     score: hospital.composite_match_score,
     ambulancesAvailable: hospital.ambulances_available,
     icuFree: hospital.available_icu_beds,

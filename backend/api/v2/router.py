@@ -15,12 +15,15 @@ from pydantic import BaseModel, Field
 from db.hospital_enrich import enrich_hospital, enrich_hospitals
 from fhir.serializers import serialize_fhir_bundle
 from graph.agents.safety_sentinel import scan_text
-from graph.llm_client import describe_provider, get_voice_model, transcribe_audio
+from graph.llm_client import companion_reply, describe_provider, explain_image, finalize_companion_reply, get_voice_model, stream_companion_reply, transcribe_audio
 from graph.mock_data import MOCK_HOSPITALS, simulate_live_telemetry
 from graph.pipeline import run_pipeline, stream_pipeline
 from graph.scoring import rank_hospitals
+from app.core.constants import DEMO_NOTICE, PROVIDER_BUSY, SAFE_ERROR, SAFE_EMERGENCY_ERROR
+from app.security.sanitization import PROMPT_INJECTION_RULES, clean_text
+from app.security.uploads import decode_image_b64
 from services.pdf_referral import generate_referral_pdf
-from services.sessions import digest_text, persist_session
+from services.sessions import persist_session
 
 router = APIRouter()
 
@@ -62,15 +65,30 @@ class TriageStreamRequest(BaseModel):
 
 
 class SosRequest(BaseModel):
-    input: str = "Emergency SOS activated from LifeRoute"
+    input: str = "Emergency SOS activated from Sathi"
     location: LocationBody = Field(default_factory=LocationBody)
     session_id: str = ""
     vitals: dict[str, Any] = Field(default_factory=dict)
     patient: dict[str, Any] = Field(default_factory=dict)
+    source: str = "senior"
+    requested_by: str = ""
 
 
 class ReferralPdfRequest(BaseModel):
     state: dict[str, Any]
+
+
+class SathiChatRequest(BaseModel):
+    message: str = Field(..., min_length=1)
+    context: dict[str, Any] = Field(default_factory=dict)
+
+
+class SathiExplainRequest(BaseModel):
+    image_base64: str = Field(..., min_length=20, max_length=8_000_000)
+    mime: str = "image/jpeg"
+    filename: str = "photo.jpg"
+    question: str = Field(default="Please explain this simply.", max_length=400)
+    context: dict[str, Any] = Field(default_factory=dict)
 
 
 def _public_state(result: dict) -> dict:
@@ -180,8 +198,8 @@ async def triage_stream(payload: TriageStreamRequest, request: Request):
                     user_esi_level=payload.esi_level,
                 )
                 yield _sse("complete", _public_state(result))
-        except Exception as exc:
-            yield _sse("error", {"detail": str(exc)})
+        except Exception:
+            yield _sse("error", {"detail": SAFE_ERROR})
 
     return StreamingResponse(generate(), media_type="text/event-stream")
 
@@ -207,11 +225,9 @@ async def triage_sync(payload: TriageStreamRequest, request: Request):
 @router.post("/emergency/sos")
 async def emergency_sos(payload: SosRequest, request: Request):
     enforce_rate_limit(request)
-    text = payload.input.strip() or "Emergency SOS — critical symptoms, send help"
-    sentinel = scan_text(text)
-    # Force emergency even if the typed text is vague — SOS is explicit consent to dispatch.
+    text = payload.input.strip() or "Emergency SOS — I need help"
     result = await run_pipeline(
-        text if sentinel.is_emergency else f"unconscious not breathing {text}",
+        text,
         {"lat": payload.location.lat, "lng": payload.location.lng},
         payload.session_id or str(uuid.uuid4()),
         vitals=payload.vitals,
@@ -220,10 +236,16 @@ async def emergency_sos(payload: SosRequest, request: Request):
     result["is_emergency"] = True
     persist_session(result)
     public = _public_state(result)
+    hospital = (public.get("selected_facility") or {}).get("name")
     public["dispatch"] = {
         "service": "108",
-        "message": "Call 108 immediately. Stay on the line.",
-        "nearest_trauma": (public.get("selected_facility") or {}).get("name"),
+        "message": "Emergency help is active. Please call 108 now.",
+        "nearest_trauma": hospital,
+        "recommended_hospital": hospital,
+        "ambulance_dispatched": True,
+        "notice": DEMO_NOTICE,
+        "source": payload.source or "senior",
+        "requested_by": payload.requested_by or "",
     }
     return public
 
@@ -293,6 +315,187 @@ async def generate_pdf(payload: ReferralPdfRequest, request: Request):
     return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
 
 
+def _sathi_context(payload: SathiChatRequest) -> dict:
+    context = dict(payload.context or {})
+    context.pop("rule", None)
+    return context
+
+
+@router.post("/sathi/chat")
+async def sathi_chat(payload: SathiChatRequest, request: Request):
+    """Everyday companion reply. Does not run hospital routing."""
+    enforce_rate_limit(request)
+    text = payload.message.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Please say something first.")
+    try:
+        reply = await asyncio.to_thread(companion_reply, clean_text(text), _sathi_context(payload))
+        return {"reply": reply, "mode": "companion"}
+    except Exception:
+        raise HTTPException(status_code=502, detail=PROVIDER_BUSY)
+
+
+@router.post("/sathi/chat/stream")
+async def sathi_chat_stream(payload: SathiChatRequest, request: Request):
+    """Stream a companion reply as tokens so Talk can type in real time."""
+    enforce_rate_limit(request)
+    text = payload.message.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Please say something first.")
+    cleaned = clean_text(text)
+    context = _sathi_context(payload)
+
+    def generate():
+        collected: list[str] = []
+        try:
+            for token in stream_companion_reply(cleaned, context):
+                collected.append(token)
+                yield f"event: token\ndata: {json.dumps({'token': token})}\n\n"
+            reply = finalize_companion_reply("".join(collected), cleaned, context)
+            yield f"event: complete\ndata: {json.dumps({'reply': reply, 'mode': 'companion'})}\n\n"
+        except Exception:
+            raw = "".join(collected).strip()
+            reply = finalize_companion_reply(raw, cleaned, context) if raw else PROVIDER_BUSY
+            yield f"event: complete\ndata: {json.dumps({'reply': reply, 'mode': 'companion'})}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+@router.post("/sathi/explain")
+async def sathi_explain(payload: SathiExplainRequest, request: Request):
+    """Photo or paper explanation in plain language."""
+    enforce_rate_limit(request)
+    try:
+        upload = decode_image_b64(payload.image_base64, mime=payload.mime, filename=payload.filename)
+        import base64
+
+        encoded = base64.b64encode(upload.data).decode("ascii")
+        reply = await asyncio.to_thread(
+            explain_image,
+            encoded,
+            upload.mime,
+            clean_text(payload.question, limit=400),
+            {"rule": PROMPT_INJECTION_RULES},
+        )
+        return {
+            "reply": reply,
+            "mode": "explain",
+            "disclaimer": "This is a simple explanation based on the available photo, not official advice.",
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        from app.core.exceptions import DomainException
+        from graph.llm_client import LLMError
+
+        if isinstance(exc, DomainException):
+            raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
+        if isinstance(exc, LLMError):
+            raise HTTPException(status_code=502, detail=PROVIDER_BUSY) from exc
+        raise HTTPException(status_code=502, detail=PROVIDER_BUSY)
+
+
+SATHI_TASKS = {
+    "day": "Summarize only today's appointments, medicines, reminders, and family tasks. Keep it short.",
+    "food": "Give simple meal ideas for an older adult in India. This is everyday food help, not a prescription.",
+    "memory": "Help them save or recall personal notes, birthdays, and preferences.",
+    "help": "Explain a bill, form, website, or phone message step by step. Warn if it asks for a password.",
+    "family": "Help them call or message a family member. Keep the next step obvious.",
+    "health": "Use saved conditions and medicines as context. Do not diagnose or prescribe.",
+}
+
+
+async def _sathi_task(task: str, payload: SathiChatRequest, request: Request):
+    enforce_rate_limit(request)
+    text = payload.message.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Please say something first.")
+    hint = SATHI_TASKS[task]
+    try:
+        reply = await asyncio.to_thread(
+            companion_reply,
+            f"{hint}\n\nThey said: {clean_text(text)}",
+            {"rule": PROMPT_INJECTION_RULES, "name": (payload.context or {}).get("name", "")},
+        )
+        return {"reply": reply, "mode": task}
+    except Exception:
+        raise HTTPException(status_code=502, detail=PROVIDER_BUSY)
+
+
+@router.post("/sathi/day")
+async def sathi_day(payload: SathiChatRequest, request: Request):
+    return await _sathi_task("day", payload, request)
+
+
+@router.post("/sathi/food")
+async def sathi_food(payload: SathiChatRequest, request: Request):
+    return await _sathi_task("food", payload, request)
+
+
+@router.post("/sathi/memory")
+async def sathi_memory(payload: SathiChatRequest, request: Request):
+    return await _sathi_task("memory", payload, request)
+
+
+@router.post("/sathi/help")
+async def sathi_help(payload: SathiChatRequest, request: Request):
+    return await _sathi_task("help", payload, request)
+
+
+@router.post("/sathi/family")
+async def sathi_family(payload: SathiChatRequest, request: Request):
+    return await _sathi_task("family", payload, request)
+
+
+@router.post("/sathi/health")
+async def sathi_health(payload: SathiChatRequest, request: Request):
+    return await _sathi_task("health", payload, request)
+
+
+@router.get("/sathi/catalog")
+async def sathi_catalog():
+    """Lists companion pages and APIs so judges can try each task separately."""
+    return {
+        "pages": [
+            "/",
+            "/talk",
+            "/health",
+            "/health/chart",
+            "/safety",
+            "/family",
+            "/more",
+            "/explain",
+            "/memory",
+            "/food",
+            "/tasks",
+            "/help",
+            "/settings",
+            "/emergency",
+        ],
+        "apis": [
+            "POST /api/v2/sathi/chat",
+            "POST /api/v2/sathi/chat/stream",
+            "POST /api/v2/sathi/explain",
+            "POST /api/v2/sathi/day",
+            "POST /api/v2/sathi/food",
+            "POST /api/v2/sathi/memory",
+            "POST /api/v2/sathi/help",
+            "POST /api/v2/sathi/family",
+            "POST /api/v2/sathi/health",
+            "POST /api/v2/emergency/sos",
+            "GET /api/v2/hospitals/nearby",
+        ],
+    }
+
+
 @router.post("/triage/voice")
 async def triage_voice(request: Request):
     """Transcribe spoken symptoms with the configured Voice_LLM omni model."""
@@ -309,5 +512,5 @@ async def triage_voice(request: Request):
             "model": get_voice_model(),
             "audio_bytes": len(body),
         }
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except Exception:
+        raise HTTPException(status_code=502, detail=PROVIDER_BUSY)
