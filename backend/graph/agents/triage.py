@@ -142,16 +142,16 @@ TRIAGE_RULES = [
 ]
 
 
-def _normalize(text: str) -> str:
-    return text.lower().strip()
+def _normalize(text: str | None) -> str:
+    return str(text or "").lower().strip()
 
 
 def _rule_based_triage(symptoms: dict) -> tuple[str, str, float] | None:
     """
     Attempt rule-based triage. Returns (level, reasoning, confidence) or None.
     """
-    chief = _normalize(symptoms.get("chief_complaint", ""))
-    associated = [_normalize(s) for s in symptoms.get("associated_symptoms", [])]
+    chief = _normalize(symptoms.get("chief_complaint"))
+    associated = [_normalize(s) for s in (symptoms.get("associated_symptoms") or [])]
     severity = symptoms.get("severity", 5)
     all_text = chief + " " + " ".join(associated)
 
