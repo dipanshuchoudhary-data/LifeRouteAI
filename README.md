@@ -34,22 +34,23 @@
 | # | Section |
 |---|---------|
 | 1 | [Who it is for](#who-it-is-for) |
-| 2 | [What older people can do](#what-older-people-can-do) |
-| 3 | [Daily life](#daily-life) |
-| 4 | [When help is needed](#when-help-is-needed) |
-| 5 | [How a day works](#how-a-day-works) |
-| 6 | [System architecture](#system-architecture) |
-| 7 | [Hospital matching](#hospital-matching) |
-| 8 | [Tech stack](#tech-stack) |
-| 9 | [Quick start](#quick-start) |
-| 10 | [Safety](#safety) |
-| 11 | [License](#license) |
+| 2 | [Recent work](#recent-work) |
+| 3 | [What older people can do](#what-older-people-can-do) |
+| 4 | [Daily life](#daily-life) |
+| 5 | [When help is needed](#when-help-is-needed) |
+| 6 | [How a day works](#how-a-day-works) |
+| 7 | [System architecture](#system-architecture) |
+| 8 | [Hospital matching](#hospital-matching) |
+| 9 | [Tech stack](#tech-stack) |
+| 10 | [Quick start](#quick-start) |
+| 11 | [Safety](#safety) |
+| 12 | [License](#license) |
 
 ---
 
 ## Who it is for
 
-LifeRoute - Sathi is made for **older adults**, not for hospital operators.
+LifeRoute - Sathi is made for **older adults**
 
 Many apps ask seniors to read dense charts, hunt through menus, or fill a form while they are unwell. This product keeps one calm path:
 
@@ -60,6 +61,31 @@ Many apps ask seniors to read dense charts, hunt through menus, or fill a form w
 - Call **108** — the app never claims an ambulance was already sent
 
 Trusted family can be added as contacts. Doctors still decide treatment. LifeRoute - Sathi prepares the next step.
+
+---
+
+## Recent work
+
+These are the companion and emergency pieces added so older adults can use LifeRoute - Sathi as one product.
+
+| Area | What we added |
+|------|----------------|
+| Talk | Chat like a normal conversation: your message first, then Sathi. Answers stream in. Chat stays after refresh. |
+| Voice | Microphone on Home and Talk. If the model is down: **Model provider is busy. Please try again later.** |
+| Photo explain | OCR + vision so a bill, letter, or medicine pack is explained in simple words. Same busy message if the model fails. |
+| Today’s plan | “Book a meeting at 9 pm today” is saved on the plan. Personal bookings Sathi cannot do get a short no. |
+| Home | Ask bar only. Chat bubbles stay on Talk. |
+| Emergency | Live map of Noida / Gurugram hospitals. Incident progress steps every ~1.4s. A real road route draws when Routing starts. |
+| Safety | Hidden rules and planning text are never shown in Talk. |
+| Deploy | SQLite is enough for a demo. Local secrets, databases, and caches stay out of git. |
+
+Gen AI (all through **OpenRouter**, keys on the server only):
+
+- Talk and daily answers — Gemini / Llama / GPT-4o-mini
+- Voice transcript — Nemotron Omni
+- Photo explain — vision models after OCR
+- Emergency complaint and referral text — Nemotron Super  
+Hospital ranking and **108** stay rule-based.
 
 ---
 
