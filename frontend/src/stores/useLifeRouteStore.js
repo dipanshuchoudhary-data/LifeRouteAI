@@ -1,10 +1,11 @@
 import { create } from 'zustand'
 import { streamTriage, triggerSos, triageSync } from '../lib/api'
+import { localEmergencyResult } from '../lib/localEmergency'
 import { adaptTriageResult } from '../lib/triageAdapters'
 import { profilePayload, useProfileStore, vitalsPayload, withProfileContext } from './useProfileStore'
 
 function defaultLocation() {
-  return { lat: 28.6139, lng: 77.209 }
+  return { lat: 28.6271, lng: 77.3649 }
 }
 
 export const useLifeRouteStore = create((set, get) => ({
@@ -16,11 +17,19 @@ export const useLifeRouteStore = create((set, get) => ({
   result: null,
   rawState: null,
   isEmergency: false,
+  sathiEmergency: null,
   esiLevel: null,
   location: defaultLocation(),
+  locationLabel: 'Noida Sector 62',
+  locationLocked: false,
 
   setSearchQuery: (searchQuery) => set({ searchQuery }),
-  setLocation: (location) => set({ location }),
+  setLocation: (location, label) =>
+    set({
+      location,
+      locationLabel: label || get().locationLabel,
+      locationLocked: Boolean(label) || get().locationLocked,
+    }),
   resetSession: () =>
     set({
       status: 'idle',
@@ -29,6 +38,7 @@ export const useLifeRouteStore = create((set, get) => ({
       result: null,
       rawState: null,
       isEmergency: false,
+      sathiEmergency: null,
       esiLevel: null,
     }),
 
@@ -98,14 +108,15 @@ export const useLifeRouteStore = create((set, get) => ({
     }
   },
 
-  triggerSOS: async () => {
+  triggerSOS: async (options = {}) => {
     const profile = useProfileStore.getState().profile
-    const input = get().searchQuery || 'Emergency SOS — unconscious not breathing'
+    const input = options.input || get().searchQuery || 'I need help'
+    const local = localEmergencyResult(get().location, input)
     set({
       status: 'emergency',
       searchQuery: input,
       error: '',
-      result: null,
+      result: local,
       isEmergency: true,
       esiLevel: 1,
       activeNode: 'emergency_fast_track',
@@ -117,19 +128,30 @@ export const useLifeRouteStore = create((set, get) => ({
         sessionId: get().sessionId,
         vitals: vitalsPayload(profile),
         patient: profilePayload(profile),
+        source: options.source || 'senior',
+        requestedBy: options.requestedBy || '',
       })
       const adapted = adaptTriageResult(payload)
       set({
         rawState: payload,
-        result: adapted,
+        result: {
+          ...local,
+          ...adapted,
+          matchedHospital: adapted?.matchedHospital || local.matchedHospital,
+          rankedHospitals: adapted?.rankedHospitals?.length ? adapted.rankedHospitals : local.rankedHospitals,
+          ambulance: adapted?.ambulance || local.ambulance,
+          route: adapted?.route || local.route,
+        },
         status: 'emergency',
         isEmergency: true,
         esiLevel: 1,
         sessionId: payload.session_id || get().sessionId,
+        sathiEmergency: payload.sathiEmergency || null,
+        error: '',
         activeNode: '',
       })
-    } catch (error) {
-      set({ error: error.message || 'SOS failed', status: 'idle', activeNode: '' })
+    } catch {
+      set({ status: 'emergency', result: local, error: '', activeNode: '' })
     }
   },
 }))

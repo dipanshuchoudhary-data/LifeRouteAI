@@ -130,18 +130,24 @@ export const TAG_COLOR_MAP = {
 export const DEFAULT_TAG_COLOR = { bg: '#F8FAFC', text: '#64748B', border: '#E2E8F0' }
 
 export const HOSPITALS = [
-  { id: 1, name: 'Fortis Escorts Heart Institute', govt: false, city: 'Delhi', rating: 4.6, reviews: 1759, distance: '6.5 km', tags: ['Cardiology', 'Cardiac Surgery', 'Interventional Cardiology', 'Critical Care'], beds: 55, wait: '~10 min', capacity: 82, contact: '+91-11-47135000' },
-  { id: 2, name: 'Max Super Speciality Hospital', govt: false, city: 'Delhi', rating: 4.4, reviews: 1896, distance: '7.1 km', tags: ['General Medicine', 'Oncology', 'Neurology', 'Orthopedics'], beds: 78, wait: '~12 min', capacity: 84, contact: '+91-11-26515050' },
-  { id: 3, name: 'AIIMS Trauma Centre', govt: true, city: 'Delhi', rating: 4.5, reviews: 1622, distance: '8.2 km', tags: ['Trauma', 'Neurology', 'Critical Care', 'General Surgery'], beds: 120, wait: '~8 min', capacity: 71, contact: '+91-11-26588500' },
-  { id: 4, name: 'Safdarjung Hospital', govt: true, city: 'Delhi', rating: 3.8, reviews: 2170, distance: '9 km', tags: ['General Medicine', 'Orthopedics', 'Gynecology', 'Pediatrics'], beds: 200, wait: '~20 min', capacity: 91, contact: '+91-11-26707437' },
+  { id: 12, name: 'Fortis Hospital Noida', city: 'Noida', rating: 4.2, reviews: 2140, distance: '1.8 km', tags: ['Emergency', 'Cardiology', 'ICU', 'Trauma'], beds: 35, wait: '~8 min', capacity: 82, contact: '+91-120-4300222', lat: 28.6245, lng: 77.3641, travelMinutes: 8 },
+  { id: 16, name: 'Apollo Hospitals Noida', city: 'Noida', rating: 4.4, reviews: 1988, distance: '3.4 km', tags: ['Emergency', 'Cardiology', 'Neurology', 'Critical Care'], beds: 52, wait: '~9 min', capacity: 81, contact: '+91-120-4012000', lat: 28.5748, lng: 77.3261, travelMinutes: 11 },
+  { id: 13, name: 'Max Super Speciality Hospital Noida', city: 'Noida', rating: 4.1, reviews: 1760, distance: '4.1 km', tags: ['General Medicine', 'Orthopedics', 'Emergency'], beds: 28, wait: '~12 min', capacity: 84, contact: '+91-120-4688888', lat: 28.5842, lng: 77.3265, travelMinutes: 12 },
+  { id: 17, name: 'Metro Hospital Noida', city: 'Noida', rating: 4.1, reviews: 1544, distance: '4.6 km', tags: ['Cardiology', 'Cardiac Surgery', 'ICU'], beds: 44, wait: '~11 min', capacity: 83, contact: '+91-120-2521111', lat: 28.5906, lng: 77.3179, travelMinutes: 13 },
+  { id: 15, name: 'Kailash Hospital & Heart Institute', city: 'Noida', rating: 4.2, reviews: 1682, distance: '5.2 km', tags: ['Cardiology', 'Cardiac Surgery', 'ICU'], beds: 48, wait: '~12 min', capacity: 84, contact: '+91-120-2444444', lat: 28.5789, lng: 77.3312, travelMinutes: 14 },
+  { id: 11, name: 'Jaypee Hospital', city: 'Noida', rating: 4.3, reviews: 2210, distance: '7.8 km', tags: ['Trauma', 'Cardiology', 'Neurology', 'ICU'], beds: 88, wait: '~10 min', capacity: 83, contact: '+91-120-4122222', lat: 28.3521, lng: 77.3278, travelMinutes: 18 },
+  { id: 6, name: 'Medanta - The Medicity', city: 'Gurugram', rating: 4.7, reviews: 4120, distance: '28 km', tags: ['Trauma', 'Cardiology', 'ICU', 'Emergency'], beds: 180, wait: '~8 min', capacity: 78, contact: '+91-124-4141414', lat: 28.4392, lng: 77.0415, travelMinutes: 32 },
+  { id: 21, name: 'Narayana Superspeciality Hospital Gurugram', city: 'Gurugram', rating: 4.4, reviews: 1890, distance: '26 km', tags: ['Cardiology', 'Cardiac Surgery', 'Critical Care'], beds: 64, wait: '~10 min', capacity: 80, contact: '+91-124-7123456', lat: 28.4946, lng: 77.0884, travelMinutes: 30 },
+  { id: 8, name: 'Fortis Memorial Research Institute', city: 'Gurugram', rating: 4.5, reviews: 3050, distance: '27 km', tags: ['Neurology', 'Oncology', 'Cardiology', 'ICU'], beds: 140, wait: '~10 min', capacity: 76, contact: '+91-124-4962200', lat: 28.4501, lng: 77.0823, travelMinutes: 31 },
+  { id: 7, name: 'Artemis Hospital', city: 'Gurugram', rating: 4.4, reviews: 2488, distance: '29 km', tags: ['Orthopedics', 'Neurology', 'Cardiology', 'Emergency'], beds: 65, wait: '~12 min', capacity: 84, contact: '+91-124-4511111', lat: 28.4215, lng: 77.0712, travelMinutes: 34 },
 ]
 
 export const NEARBY_AMBULANCES = [
-  { id: 'AMB-01', type: 'ALS', callSign: 'DELHI-ALS-017', driver: 'Rajesh Kumar', distance: '1.2 km', eta: '3 min', status: 'available', equipment: ['Defibrillator', 'Ventilator', 'Cardiac Monitor'], phone: '+91 98765 43210' },
-  { id: 'AMB-02', type: 'BLS', callSign: 'DELHI-BLS-042', driver: 'Amit Sharma', distance: '2.4 km', eta: '5 min', status: 'available', equipment: ['First Aid', 'Oxygen', 'Stretcher'], phone: '+91 98765 43211' },
-  { id: 'AMB-03', type: 'ALS', callSign: 'DELHI-ALS-009', driver: 'Sunil Verma', distance: '3.1 km', eta: '7 min', status: 'available', equipment: ['Defibrillator', 'Ventilator', 'IV Setup'], phone: '+91 98765 43212' },
-  { id: 'AMB-04', type: 'BLS', callSign: 'NCR-BLS-088', driver: 'Pradeep Singh', distance: '4.5 km', eta: '9 min', status: 'en-route', equipment: ['First Aid', 'Oxygen', 'Stretcher'], phone: '+91 98765 43213' },
-  { id: 'AMB-05', type: 'ALS', callSign: 'DELHI-ALS-031', driver: 'Vikram Yadav', distance: '5.8 km', eta: '12 min', status: 'available', equipment: ['Defibrillator', 'Cardiac Monitor', 'Drug Kit'], phone: '+91 98765 43214' },
+  { id: 'AMB-01', type: 'ALS', callSign: 'NOI-ALS-014', driver: 'Rajesh Kumar', distance: '1.6 km', eta: '4 min', status: 'assigned', equipment: ['Defibrillator', 'Ventilator', 'Cardiac Monitor'], phone: '+91 98765 43210' },
+  { id: 'AMB-02', type: 'BLS', callSign: 'NOI-BLS-042', driver: 'Amit Sharma', distance: '2.4 km', eta: '6 min', status: 'available', equipment: ['First Aid', 'Oxygen', 'Stretcher'], phone: '+91 98765 43211' },
+  { id: 'AMB-03', type: 'ALS', callSign: 'GGN-ALS-009', driver: 'Sunil Verma', distance: '3.1 km', eta: '8 min', status: 'en-route', equipment: ['Defibrillator', 'Ventilator', 'IV Setup'], phone: '+91 98765 43212' },
+  { id: 'AMB-04', type: 'BLS', callSign: 'NCR-BLS-088', driver: 'Pradeep Singh', distance: '4.5 km', eta: '9 min', status: 'available', equipment: ['First Aid', 'Oxygen', 'Stretcher'], phone: '+91 98765 43213' },
+  { id: 'AMB-05', type: 'ALS', callSign: 'GGN-ALS-031', driver: 'Vikram Yadav', distance: '5.8 km', eta: '12 min', status: 'available', equipment: ['Defibrillator', 'Cardiac Monitor', 'Drug Kit'], phone: '+91 98765 43214' },
 ]
 
 export const BLOOD_BANKS = [
