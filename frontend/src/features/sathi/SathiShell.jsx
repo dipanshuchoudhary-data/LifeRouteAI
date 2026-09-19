@@ -36,8 +36,18 @@ export default function SathiShell({ onHelp, children, wide = false }) {
     const close = (event) => {
       if (moreRef.current && !moreRef.current.contains(event.target)) setMoreOpen(false)
     }
+    const onKey = (event) => {
+      if (event.key === 'Escape') {
+        setMoreOpen(false)
+        setMenuOpen(false)
+      }
+    }
     document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', close)
+      document.removeEventListener('keydown', onKey)
+    }
   }, [])
 
   return (
@@ -70,11 +80,12 @@ export default function SathiShell({ onHelp, children, wide = false }) {
                 type="button"
                 className={`sathi-tab${tab === 'more' ? ' active' : ''}`}
                 aria-expanded={moreOpen}
+                aria-controls="sathi-more-menu"
                 onClick={() => setMoreOpen((open) => !open)}
               >
                 <MoreHorizontal size={15} /> More
               </button>
-              <div className="sathi-menu">
+              <div id="sathi-more-menu" className="sathi-menu" hidden={!moreOpen}>
                 {MORE_LINKS.map((item) => (
                   <NavLink key={item.to} to={item.to} onClick={() => setMoreOpen(false)}>
                     {item.label}
@@ -85,7 +96,7 @@ export default function SathiShell({ onHelp, children, wide = false }) {
           </div>
 
           <div className="sathi-top-right">
-            <button type="button" className="sathi-emergency" onClick={onHelp}>
+            <button type="button" className="sathi-emergency" onClick={onHelp} aria-label="Start emergency help">
               <ShieldPlus size={16} /> Emergency
             </button>
             <NavLink className="sathi-userchip" to={PATHS.settings}>
@@ -100,6 +111,7 @@ export default function SathiShell({ onHelp, children, wide = false }) {
               className="sathi-burger"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
+              aria-controls="sathi-mobile-menu"
               onClick={() => setMenuOpen((open) => !open)}
             >
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -107,7 +119,7 @@ export default function SathiShell({ onHelp, children, wide = false }) {
           </div>
         </nav>
         {menuOpen && (
-          <div className="sathi-mobile-menu open">
+          <div id="sathi-mobile-menu" className="sathi-mobile-menu open">
             {TABS.map((item) => (
               <NavLink key={item.id} to={item.to} end={item.end} onClick={() => setMenuOpen(false)}>
                 {item.label}

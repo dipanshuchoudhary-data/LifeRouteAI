@@ -28,13 +28,23 @@ async function readError(response) {
   return data.error || data.detail || 'Something went wrong. Please try again.'
 }
 
+let sessionWait = null
+
 export async function ensureSession() {
-  if (getSessionToken()) return getSessionToken()
-  const response = await fetch(apiUrl('/api/v1/auth/demo'), { method: 'POST' })
-  if (!response.ok) throw new Error(await readError(response))
-  const data = await response.json()
-  if (data.token) setSessionToken(data.token)
-  return data.token
+  const existing = getSessionToken()
+  if (existing) return existing
+  if (!sessionWait) {
+    sessionWait = (async () => {
+      const response = await fetch(apiUrl('/api/v1/auth/demo'), { method: 'POST' })
+      if (!response.ok) throw new Error(await readError(response))
+      const data = await response.json()
+      if (data.token) setSessionToken(data.token)
+      return data.token
+    })().finally(() => {
+      sessionWait = null
+    })
+  }
+  return sessionWait
 }
 
 async function readSse(response, onEvent) {
@@ -305,10 +315,17 @@ export async function downloadReferralPdf(state) {
   URL.revokeObjectURL(url)
 }
 
+const nearbyWait = new Map()
+
 export async function fetchNearbyHospitals({ lat = 28.6139, lng = 77.209 } = {}) {
-  const response = await fetch(apiUrl(`/api/v2/hospitals/nearby?lat=${lat}&lng=${lng}`))
-  if (!response.ok) return null
-  return response.json()
+  const key = `${Number(lat).toFixed(3)},${Number(lng).toFixed(3)}`
+  const pending = nearbyWait.get(key)
+  if (pending) return pending
+  const request = fetch(apiUrl(`/api/v2/hospitals/nearby?lat=${lat}&lng=${lng}`))
+    .then((response) => (response.ok ? response.json() : null))
+    .finally(() => nearbyWait.delete(key))
+  nearbyWait.set(key, request)
+  return request
 }
 
 export async function transcribeVoice(blob, { timeoutMs = 12000 } = {}) {

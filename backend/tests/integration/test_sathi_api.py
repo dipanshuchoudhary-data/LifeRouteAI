@@ -79,3 +79,24 @@ def test_safe_error_shape():
     text = str(payload)
     assert "sqlalchemy" not in text.lower()
     assert "traceback" not in text.lower()
+
+
+def test_v2_chat_requires_session_and_limits_length():
+    denied = client.post("/api/v2/sathi/chat", json={"message": "hello sathi"})
+    assert denied.status_code == 403
+    too_long = client.post(
+        "/api/v2/sathi/chat",
+        headers=_session(),
+        json={"message": "x" * 2001},
+    )
+    assert too_long.status_code == 422
+
+
+def test_nearby_hospitals_return_ncr_list():
+    first = client.get("/api/v2/hospitals/nearby?lat=28.5355&lng=77.3910")
+    second = client.get("/api/v2/hospitals/nearby?lat=28.5355&lng=77.3910")
+    assert first.status_code == 200
+    assert second.status_code == 200
+    hospitals = first.json()["hospitals"]
+    assert hospitals
+    assert hospitals[0]["name"]

@@ -76,8 +76,8 @@ These are the companion and emergency pieces added so older adults can use LifeR
 | Today’s plan | “Book a meeting at 9 pm today” is saved on the plan. Personal bookings Sathi cannot do get a short no. |
 | Home | Ask bar only. Chat bubbles stay on Talk. |
 | Emergency | Live map of Noida / Gurugram hospitals. Incident progress steps every ~1.4s. A real road route draws when Routing starts. |
-| Safety | Hidden rules and planning text are never shown in Talk. |
-| Deploy | SQLite is enough for a demo. Local secrets, databases, and caches stay out of git. |
+| Safety | Hidden rules and planning text are never shown in Talk. Talk and photo APIs need a session. |
+| Deploy | SQLite is enough for a demo. Local secrets, databases, and caches stay out of git. Nearby hospital lists are cached so the live map does not recompute on every tick. |
 
 Gen AI (all through **OpenRouter**, keys on the server only):
 

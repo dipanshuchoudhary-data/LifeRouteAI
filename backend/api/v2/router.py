@@ -8,7 +8,7 @@ import time
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -19,7 +19,9 @@ from graph.llm_client import companion_reply, describe_provider, explain_image, 
 from graph.mock_data import MOCK_HOSPITALS, simulate_live_telemetry
 from graph.pipeline import run_pipeline, stream_pipeline
 from graph.scoring import rank_hospitals
+from app.api.dependencies import get_current_user
 from app.core.constants import DEMO_NOTICE, PROVIDER_BUSY, SAFE_ERROR, SAFE_EMERGENCY_ERROR
+from app.security.authentication import CurrentUser
 from app.security.sanitization import PROMPT_INJECTION_RULES, clean_text
 from app.security.uploads import decode_image_b64
 from services.pdf_referral import generate_referral_pdf
@@ -31,6 +33,7 @@ router = APIRouter()
 _RATE: dict[str, list[float]] = {}
 _RATE_LIMIT = 30
 _RATE_WINDOW = 60.0
+_NEARBY_CACHE: dict[tuple, tuple[float, dict]] = {}
 
 
 def _client_ip(request: Request) -> str:
@@ -65,7 +68,7 @@ class TriageStreamRequest(BaseModel):
 
 
 class SosRequest(BaseModel):
-    input: str = "Emergency SOS activated from Sathi"
+    input: str = Field(default="Emergency SOS activated from Sathi", max_length=500)
     location: LocationBody = Field(default_factory=LocationBody)
     session_id: str = ""
     vitals: dict[str, Any] = Field(default_factory=dict)
@@ -79,7 +82,7 @@ class ReferralPdfRequest(BaseModel):
 
 
 class SathiChatRequest(BaseModel):
-    message: str = Field(..., min_length=1)
+    message: str = Field(..., min_length=1, max_length=2000)
     context: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -257,6 +260,10 @@ async def hospitals_nearby(
     esi_level: int = Query(default=4, ge=1, le=5),
     complaint: str = Query(default="general"),
 ):
+    key = (round(lat, 3), round(lng, 3), esi_level, (complaint or "general")[:40])
+    hit = _NEARBY_CACHE.get(key)
+    if hit and time.time() - hit[0] < 20:
+        return hit[1]
     try:
         from db.hospitals import get_all_hospitals
 
@@ -273,7 +280,9 @@ async def hospitals_nearby(
         travel = estimate_travel(hospital, origin, mode="ambulance" if esi_level <= 2 else "driving")
         annotated.append({**hospital, **travel})
     ranked = rank_hospitals(annotated, complaint=complaint, esi_level=esi_level, limit=8)
-    return {"hospitals": enrich_hospitals(ranked), "origin": origin}
+    payload = {"hospitals": enrich_hospitals(ranked), "origin": origin}
+    _NEARBY_CACHE[key] = (time.time(), payload)
+    return payload
 
 
 @router.websocket("/hospitals/{hospital_id}/telemetry")
@@ -322,7 +331,11 @@ def _sathi_context(payload: SathiChatRequest) -> dict:
 
 
 @router.post("/sathi/chat")
-async def sathi_chat(payload: SathiChatRequest, request: Request):
+async def sathi_chat(
+    payload: SathiChatRequest,
+    request: Request,
+    _user: CurrentUser = Depends(get_current_user),
+):
     """Everyday companion reply. Does not run hospital routing."""
     enforce_rate_limit(request)
     text = payload.message.strip()
@@ -336,7 +349,11 @@ async def sathi_chat(payload: SathiChatRequest, request: Request):
 
 
 @router.post("/sathi/chat/stream")
-async def sathi_chat_stream(payload: SathiChatRequest, request: Request):
+async def sathi_chat_stream(
+    payload: SathiChatRequest,
+    request: Request,
+    _user: CurrentUser = Depends(get_current_user),
+):
     """Stream a companion reply as tokens so Talk can type in real time."""
     enforce_rate_limit(request)
     text = payload.message.strip()
@@ -370,7 +387,11 @@ async def sathi_chat_stream(payload: SathiChatRequest, request: Request):
 
 
 @router.post("/sathi/explain")
-async def sathi_explain(payload: SathiExplainRequest, request: Request):
+async def sathi_explain(
+    payload: SathiExplainRequest,
+    request: Request,
+    _user: CurrentUser = Depends(get_current_user),
+):
     """Photo or paper explanation in plain language."""
     enforce_rate_limit(request)
     try:
@@ -431,32 +452,56 @@ async def _sathi_task(task: str, payload: SathiChatRequest, request: Request):
 
 
 @router.post("/sathi/day")
-async def sathi_day(payload: SathiChatRequest, request: Request):
+async def sathi_day(
+    payload: SathiChatRequest,
+    request: Request,
+    _user: CurrentUser = Depends(get_current_user),
+):
     return await _sathi_task("day", payload, request)
 
 
 @router.post("/sathi/food")
-async def sathi_food(payload: SathiChatRequest, request: Request):
+async def sathi_food(
+    payload: SathiChatRequest,
+    request: Request,
+    _user: CurrentUser = Depends(get_current_user),
+):
     return await _sathi_task("food", payload, request)
 
 
 @router.post("/sathi/memory")
-async def sathi_memory(payload: SathiChatRequest, request: Request):
+async def sathi_memory(
+    payload: SathiChatRequest,
+    request: Request,
+    _user: CurrentUser = Depends(get_current_user),
+):
     return await _sathi_task("memory", payload, request)
 
 
 @router.post("/sathi/help")
-async def sathi_help(payload: SathiChatRequest, request: Request):
+async def sathi_help(
+    payload: SathiChatRequest,
+    request: Request,
+    _user: CurrentUser = Depends(get_current_user),
+):
     return await _sathi_task("help", payload, request)
 
 
 @router.post("/sathi/family")
-async def sathi_family(payload: SathiChatRequest, request: Request):
+async def sathi_family(
+    payload: SathiChatRequest,
+    request: Request,
+    _user: CurrentUser = Depends(get_current_user),
+):
     return await _sathi_task("family", payload, request)
 
 
 @router.post("/sathi/health")
-async def sathi_health(payload: SathiChatRequest, request: Request):
+async def sathi_health(
+    payload: SathiChatRequest,
+    request: Request,
+    _user: CurrentUser = Depends(get_current_user),
+):
     return await _sathi_task("health", payload, request)
 
 

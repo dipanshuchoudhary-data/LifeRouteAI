@@ -42,13 +42,16 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
   const { hospitals, ambulances } = useLiveFacilities(origin)
   const [elapsed, setElapsed] = useState(0)
   const [tick, setTick] = useState(0)
-  const startedAt = useRef(Date.now())
+  const startedAt = useRef(0)
 
   useEffect(() => {
     startedAt.current = Date.now()
-    setElapsed(0)
-    setTick(0)
-    const clockId = setInterval(() => setElapsed(Date.now() - startedAt.current), 200)
+    const doneAt = STAGE_MS * INCIDENT_STAGES.length + 200
+    const clockId = setInterval(() => {
+      const next = Date.now() - startedAt.current
+      setElapsed(next)
+      if (next >= doneAt) clearInterval(clockId)
+    }, 200)
     const callId = setInterval(() => setTick((n) => n + 1), 1400)
     return () => {
       clearInterval(clockId)

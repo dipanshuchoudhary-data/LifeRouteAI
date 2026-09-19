@@ -9,12 +9,21 @@ from app.core.config import settings
 
 Base = declarative_base()
 
-_connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
-if settings.database_url.startswith("sqlite:///./"):
-    data_dir = Path(__file__).resolve().parents[3] / "data"
-    data_dir.mkdir(parents=True, exist_ok=True)
 
-engine = create_engine(settings.database_url, future=True, connect_args=_connect_args)
+def _database_url() -> str:
+    url = settings.database_url
+    if url.startswith("sqlite:///./"):
+        data_dir = Path(__file__).resolve().parents[3] / "data"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        filename = Path(url.replace("sqlite:///./", "", 1)).name or "sathi.db"
+        return f"sqlite:///{(data_dir / filename).as_posix()}"
+    return url
+
+
+DATABASE_URL = _database_url()
+_connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
+engine = create_engine(DATABASE_URL, future=True, connect_args=_connect_args)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
 

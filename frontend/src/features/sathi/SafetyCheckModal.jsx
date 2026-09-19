@@ -13,12 +13,15 @@ export default function SafetyCheckModal({
   onDismiss,
 }) {
   const notifyRef = useRef(onNotifyFamily)
-  notifyRef.current = onNotifyFamily
+  const firstAction = useRef(null)
   const [seconds, setSeconds] = useState(25)
 
   useEffect(() => {
+    notifyRef.current = onNotifyFamily
+  }, [onNotifyFamily])
+
+  useEffect(() => {
     if (!open || stage !== 'ask') {
-      setSeconds(25)
       return undefined
     }
     const timer = setInterval(() => {
@@ -34,6 +37,10 @@ export default function SafetyCheckModal({
     return () => clearInterval(timer)
   }, [open, stage])
 
+  useEffect(() => {
+    if (open) firstAction.current?.focus()
+  }, [open, stage])
+
   if (!open) return null
 
   return (
@@ -45,7 +52,7 @@ export default function SafetyCheckModal({
             <p>Your watch noticed something unusual. {(reasons || []).join('. ')}.</p>
             <p className="sathi-muted">If you do not answer in {seconds} seconds, Sathi will tell a trusted family member. This is not an ambulance yet.</p>
             <div className="sathi-actions">
-              <button type="button" className="sathi-btn" onClick={onFine}><Check size={15} /> I am fine</button>
+              <button type="button" className="sathi-btn" ref={firstAction} onClick={onFine}><Check size={15} /> I am fine</button>
               <button type="button" className="sathi-btn-danger" onClick={onHelp}><ShieldAlert size={15} /> I need help</button>
             </div>
           </>
@@ -60,7 +67,7 @@ export default function SafetyCheckModal({
               Emergency help starts only if you or they ask.
             </p>
             <div className="sathi-actions">
-              <button type="button" className="sathi-btn" onClick={onFine}><Check size={15} /> I am fine now</button>
+              <button type="button" className="sathi-btn" ref={firstAction} onClick={onFine}><Check size={15} /> I am fine now</button>
               <button type="button" className="sathi-btn-danger" onClick={onEscalate}><ShieldAlert size={15} /> Start emergency help</button>
               <button type="button" className="sathi-btn-ghost" onClick={onDismiss}><X size={15} /> Close</button>
             </div>
