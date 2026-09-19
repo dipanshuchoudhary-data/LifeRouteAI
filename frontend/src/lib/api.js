@@ -255,8 +255,9 @@ export async function sathiExplain({ imageBase64, mime, question, context, filen
     }
     throw new Error(explainError(recovered, lastError))
   } catch (err) {
-    if (err?.name === 'AbortError') throw new Error(PROVIDER_BUSY)
-    throw err instanceof Error ? err : new Error(lastError)
+    if (err?.name === 'AbortError') throw new Error(PROVIDER_BUSY, { cause: err })
+    if (err instanceof Error) throw err
+    throw new Error(lastError, { cause: err })
   } finally {
     clearTimeout(timer)
   }

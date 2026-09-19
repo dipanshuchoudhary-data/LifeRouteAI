@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Check, Navigation, Phone } from 'lucide-react'
 import FacilityMap from '../maps/FacilityMap'
 import { useLifeRouteStore } from '../../stores/useLifeRouteStore'
@@ -38,17 +38,15 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
   const esiLevel = useLifeRouteStore((s) => s.esiLevel)
   const sessionId = useLifeRouteStore((s) => s.sessionId)
   const profile = useProfileStore((s) => s.profile)
-  const contacts = profile.emergencyContacts || []
   const { hospitals, ambulances } = useLiveFacilities(origin)
   const [elapsed, setElapsed] = useState(0)
   const [tick, setTick] = useState(0)
-  const startedAt = useRef(0)
+  const [startedAt] = useState(() => Date.now())
 
   useEffect(() => {
-    startedAt.current = Date.now()
     const doneAt = STAGE_MS * INCIDENT_STAGES.length + 200
     const clockId = setInterval(() => {
-      const next = Date.now() - startedAt.current
+      const next = Date.now() - startedAt
       setElapsed(next)
       if (next >= doneAt) clearInterval(clockId)
     }, 200)
@@ -57,7 +55,7 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
       clearInterval(clockId)
       clearInterval(callId)
     }
-  }, [])
+  }, [startedAt])
 
   const progress = incidentClock(elapsed)
   const hospital = result?.matchedHospital
@@ -65,8 +63,8 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
   const esi = result?.esiLevel || esiLevel || 1
   const critical = esi <= 2
   const family = useMemo(
-    () => contacts.filter((row) => row.name || row.phone),
-    [contacts],
+    () => (profile.emergencyContacts || []).filter((row) => row.name || row.phone),
+    [profile.emergencyContacts],
   )
   const diverted = Boolean(hospital?.divert)
   const assigned = progress.assigned && Boolean(unit)
@@ -188,7 +186,7 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
           {INCIDENT_STAGES.map((stage, index) => {
             const state = index < progress.index ? 'done' : index === progress.index ? 'active' : ''
             const stamp = index < progress.index || (index === progress.index && index < INCIDENT_STAGES.length - 1)
-              ? clock(startedAt.current, index * STAGE_MS)
+              ? clock(startedAt, index * STAGE_MS)
               : index === progress.index
                 ? 'Now'
                 : '—'
