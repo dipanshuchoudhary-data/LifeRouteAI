@@ -41,7 +41,7 @@ export default function SafetyPanel({ profile, events, onHelp }) {
           </strong>
           <p>{contacts.length ? `${contacts.length} trusted people can be reached` : 'Add a family phone number'}</p>
         </div>
-        <button type="button" className="sathi-btn-danger" onClick={onHelp}>
+        <button type="button" className="sathi-btn-danger" onClick={onHelp} aria-label="Start emergency help">
           <ShieldAlert size={15} /> Emergency help
         </button>
       </article>

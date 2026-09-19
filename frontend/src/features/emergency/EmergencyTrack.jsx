@@ -106,6 +106,10 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
         <a className="ops-sos ops-live-sos" href="tel:108"><Phone size={14} /> Call 108</a>
       </header>
 
+      <p className="sathi-banner" role="status">
+        Coordination preview. This demo does not dispatch an ambulance. Call 108 for real help.
+      </p>
+
       {diverted && hospitalReady && (
         <div className="ops-live-alert" role="status">
           Hospital divert — alternate facility is ready.

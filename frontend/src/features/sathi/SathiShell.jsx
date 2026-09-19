@@ -55,7 +55,7 @@ export default function SathiShell({ onHelp, children, wide = false }) {
       <a className="sathi-skip" href="#sathi-main">Skip to content</a>
       <header className="sathi-top">
         <nav className="sathi-navbar" aria-label="Sathi">
-          <button type="button" className="sathi-brand" onClick={() => navigate(PATHS.home)}>
+          <button type="button" className="sathi-brand" aria-label="Go to home" onClick={() => navigate(PATHS.home)}>
             <span className="sathi-mark"><Heart size={18} fill="currentColor" /></span>
             <span>
               <strong>Sathi AI</strong>
@@ -80,6 +80,7 @@ export default function SathiShell({ onHelp, children, wide = false }) {
                 type="button"
                 className={`sathi-tab${tab === 'more' ? ' active' : ''}`}
                 aria-expanded={moreOpen}
+                aria-haspopup="true"
                 aria-controls="sathi-more-menu"
                 onClick={() => setMoreOpen((open) => !open)}
               >

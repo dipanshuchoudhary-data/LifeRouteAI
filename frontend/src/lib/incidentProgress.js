@@ -4,7 +4,7 @@ export const ROUTE_DRAW_MS = 1600
 export const INCIDENT_STAGES = [
   { id: 'received', label: 'Received', hint: 'Case received' },
   { id: 'classified', label: 'Classified', hint: 'Classifying ESI' },
-  { id: 'ambulance', label: 'Ambulance', hint: 'Dispatching nearby unit' },
+  { id: 'ambulance', label: 'Ambulance', hint: 'Matching nearby unit' },
   { id: 'hospital', label: 'Hospital', hint: 'Matching receiving facility' },
   { id: 'routing', label: 'Routing', hint: 'Calculating live route' },
   { id: 'arrival', label: 'Arrival', hint: 'En route to hospital' },

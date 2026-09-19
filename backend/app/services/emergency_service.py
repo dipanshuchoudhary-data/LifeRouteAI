@@ -35,6 +35,7 @@ def start_emergency(
     lng: float = 77.209,
     notify_family: bool = True,
     confirm: bool = True,
+    hospital_name: str = "",
 ) -> dict:
     require_emergency_permission(user)
     if confirm:
@@ -50,7 +51,7 @@ def start_emergency(
     machine.run_standard_path(notify_family=notify_family and bool(contacts))
 
     summary = clean_text(text, limit=240) or "Help requested"
-    hospital_name = _sync_hospital(text, location)
+    hospital_name = choose_hospital_name(text, location, hospital_name)
 
     family_notice = None
     if notify_family and contacts:
@@ -63,7 +64,7 @@ def start_emergency(
             user.id,
             contact_id=person.id,
             to_name=person.name,
-            text="Emergency help was requested. Family has been notified.",
+            text="Emergency request prepared. Family notification simulated in this demo.",
         )
 
     case = EmergencyCase(
@@ -79,6 +80,13 @@ def start_emergency(
     )
     EmergencyRepository(db).save(case)
     return public_emergency(case, family_notice=family_notice, requested_by=requested_by)
+
+
+def choose_hospital_name(text: str, location: dict, provided: str = "") -> str:
+    """Reuse a hospital already chosen by the SOS pipeline. Do not route twice."""
+    if (provided or "").strip():
+        return provided.strip()
+    return _sync_hospital(text, location)
 
 
 def _sync_hospital(text: str, location: dict) -> str:
@@ -139,7 +147,7 @@ def public_emergency(case: EmergencyCase, family_notice=None, requested_by: str 
         "notice": DEMO_NOTICE,
         "family_notification": {
             "simulated": True,
-            "message": family_notice.message if family_notice else "Family has been notified.",
+            "message": family_notice.message if family_notice else "Family notification simulated in this demo.",
         } if case.state in {"FAMILY_NOTIFIED", "ASSISTANCE_ACTIVE", "RESOLVED"} else None,
         "actions": {
             "call_108": True,

@@ -54,6 +54,7 @@ def test_emergency_state_machine_and_ownership():
     body = created.json()
     assert body["state"] == "ASSISTANCE_ACTIVE"
     assert body["actions"]["ambulance_dispatched"] is False
+    assert "simulated" in body["notice"].lower()
     assert body["passport"]["name"]
     stolen = client.get("/api/v1/emergency/not-your-case", headers=headers)
     assert stolen.status_code == 404
@@ -90,6 +91,36 @@ def test_v2_chat_requires_session_and_limits_length():
         json={"message": "x" * 2001},
     )
     assert too_long.status_code == 422
+
+
+def test_v2_sos_is_honest_and_can_persist_case():
+    headers = _session()
+    response = client.post(
+        "/api/v2/emergency/sos",
+        headers=headers,
+        json={"input": "I need help", "location": {"lat": 28.6139, "lng": 77.209}},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["dispatch"]["ambulance_dispatched"] is False
+    assert "simulated" in body["dispatch"]["notice"].lower()
+    assert body["sathiEmergency"]
+    assert body["sathiEmergency"]["actions"]["ambulance_dispatched"] is False
+    assert body["sathiEmergency"]["id"]
+
+
+def test_v1_emergency_is_rate_limited():
+    from unittest.mock import Mock
+
+    from app.security.rate_limit import enforce_rate_limit
+
+    request = Mock()
+    request.headers = {}
+    request.client.host = "testclient"
+    for _ in range(30):
+        enforce_rate_limit(request)
+    last = client.post("/api/v1/emergency", headers=_session(), json={"input": "I need help", "confirm": True})
+    assert last.status_code == 429
 
 
 def test_nearby_hospitals_return_ncr_list():

@@ -118,45 +118,21 @@ export async function triageSync({ input, location, sessionId, vitals, patient, 
 
 export async function triggerSos({ input, location, sessionId, vitals, patient, source, requestedBy }) {
   await ensureSession().catch(() => null)
-  const [legacy, prepared] = await Promise.allSettled([
-    fetch(apiUrl('/api/v2/emergency/sos'), {
-      method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({
-        input: input || 'I need help',
-        location: location || { lat: 28.6139, lng: 77.209 },
-        session_id: sessionId || '',
-        vitals: vitals || {},
-        patient: patient || {},
-        source: source || 'senior',
-        requested_by: requestedBy || '',
-      }),
-    }).then(async (response) => {
-      if (!response.ok) throw new Error(await readError(response))
-      return response.json()
+  const response = await fetch(apiUrl('/api/v2/emergency/sos'), {
+    method: 'POST',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({
+      input: input || 'I need help',
+      location: location || { lat: 28.6139, lng: 77.209 },
+      session_id: sessionId || '',
+      vitals: vitals || {},
+      patient: patient || {},
+      source: source || 'senior',
+      requested_by: requestedBy || '',
     }),
-    fetch(apiUrl('/api/v1/emergency'), {
-      method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({
-        input: input || 'I need help',
-        source: source || 'senior',
-        requested_by: requestedBy || '',
-        lat: location?.lat ?? 28.6139,
-        lng: location?.lng ?? 77.209,
-        notify_family: true,
-        confirm: true,
-      }),
-    }).then(async (response) => {
-      if (!response.ok) throw new Error(await readError(response))
-      return response.json()
-    }),
-  ])
-  if (legacy.status !== 'fulfilled') throw new Error(legacy.reason?.message || 'SOS failed')
-  return {
-    ...legacy.value,
-    sathiEmergency: prepared.status === 'fulfilled' ? prepared.value : null,
-  }
+  })
+  if (!response.ok) throw new Error(await readError(response))
+  return response.json()
 }
 
 export async function resolveEmergency(emergencyId) {
@@ -204,9 +180,10 @@ export async function sathiChat({ message, context, confirm = false, signal }) {
     body: JSON.stringify({ message, context: context || {}, confirm }),
     signal,
   })
-  if (response.ok) {
-    const data = await response.json().catch(() => ({}))
-    if (data.reply) return data
+  const data = await response.json().catch(() => ({}))
+  if (response.ok && data.reply) return data
+  if (response.status && response.status < 500) {
+    throw new Error(data.error || data.detail || PROVIDER_BUSY)
   }
   const fallback = await fetch(apiUrl('/api/v1/sathi/chat'), {
     method: 'POST',
@@ -214,9 +191,9 @@ export async function sathiChat({ message, context, confirm = false, signal }) {
     body: JSON.stringify({ message, confirm }),
     signal,
   })
-  const data = await fallback.json().catch(() => ({}))
-  if (!fallback.ok) throw new Error(data.error || data.detail || PROVIDER_BUSY)
-  return data
+  const recovered = await fallback.json().catch(() => ({}))
+  if (!fallback.ok) throw new Error(recovered.error || recovered.detail || PROVIDER_BUSY)
+  return recovered
 }
 
 export async function sathiTask(task, { message, context, signal }) {
@@ -248,33 +225,38 @@ export async function sathiExplain({ imageBase64, mime, question, context, filen
     filename,
     context: context || {},
   }
-  const urls = ['/api/v2/sathi/explain', '/api/v1/sathi/explain']
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), 90_000)
   let lastError = PROVIDER_BUSY
   try {
-    for (const path of urls) {
-      try {
-        const response = await fetch(apiUrl(path), {
-          method: 'POST',
-          headers: authHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify(payload),
-          signal: controller.signal,
-        })
-        const data = await response.json().catch(() => ({}))
-        if (response.ok && (data.reply || data.text)) {
-          return { ...data, reply: data.reply || data.text }
-        }
-        lastError = explainError(data, lastError)
-      } catch (err) {
-        if (err?.name === 'AbortError') {
-          lastError = PROVIDER_BUSY
-          break
-        }
-        lastError = PROVIDER_BUSY
-      }
+    const response = await fetch(apiUrl('/api/v2/sathi/explain'), {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    })
+    const data = await response.json().catch(() => ({}))
+    if (response.ok && (data.reply || data.text)) {
+      return { ...data, reply: data.reply || data.text }
     }
-    throw new Error(lastError)
+    lastError = explainError(data, lastError)
+    if (response.status && response.status < 500) {
+      throw new Error(lastError)
+    }
+    const fallback = await fetch(apiUrl('/api/v1/sathi/explain'), {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    })
+    const recovered = await fallback.json().catch(() => ({}))
+    if (fallback.ok && (recovered.reply || recovered.text)) {
+      return { ...recovered, reply: recovered.reply || recovered.text }
+    }
+    throw new Error(explainError(recovered, lastError))
+  } catch (err) {
+    if (err?.name === 'AbortError') throw new Error(PROVIDER_BUSY)
+    throw err instanceof Error ? err : new Error(lastError)
   } finally {
     clearTimeout(timer)
   }

@@ -161,7 +161,7 @@ def run_sathi_turn(db: Session, user: CurrentUser, message: str, *, confirm: boo
         from app.services.emergency_service import start_emergency
 
         emergency = start_emergency(db, user, text=text, source="voice", confirm=True)
-        reply = "I prepared emergency help. Please call 108 now. Family has been notified."
+        reply = "I prepared emergency help. Please call 108 now. Family notification is simulated in this demo."
         repo.add_turn(user.id, "sathi", reply, intent)
         return {
             "reply": reply,

@@ -8,6 +8,11 @@ const DRIVERS = ['Rajesh Kumar', 'Amit Sharma', 'Sunil Verma', 'Pradeep Singh', 
 const EQUIP_ALS = ['Defibrillator', 'Ventilator', 'Cardiac Monitor']
 const EQUIP_BLS = ['First Aid', 'Oxygen', 'Stretcher']
 const POLL_MS = 30000
+const TICK_MS = 8000
+
+export function canPollLiveFacilities(hidden) {
+  return hidden !== true
+}
 
 const nearbyCache = { key: '', at: 0, list: null }
 
@@ -138,13 +143,37 @@ export default function useLiveFacilities(origin = DEFAULT_ORIGIN) {
         if (!cancelled) setLive(false)
       }
     }
-    load()
-    const poll = setInterval(load, POLL_MS)
-    const clock = setInterval(() => setTick((n) => n + 1), 8000)
-    return () => {
-      cancelled = true
+    let poll
+    let clock
+    const stopTimers = () => {
       clearInterval(poll)
       clearInterval(clock)
+      poll = undefined
+      clock = undefined
+    }
+    const startTimers = () => {
+      if (poll || clock) return
+      load()
+      poll = setInterval(load, POLL_MS)
+      clock = setInterval(() => setTick((n) => n + 1), TICK_MS)
+    }
+    const onVisibility = () => {
+      if (typeof document !== 'undefined' && !canPollLiveFacilities(document.hidden)) {
+        stopTimers()
+        return
+      }
+      startTimers()
+    }
+    onVisibility()
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', onVisibility)
+    }
+    return () => {
+      cancelled = true
+      stopTimers()
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', onVisibility)
+      }
     }
   }, [lat, lng])
 

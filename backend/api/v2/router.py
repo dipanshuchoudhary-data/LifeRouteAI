@@ -11,6 +11,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from db.hospital_enrich import enrich_hospital, enrich_hospitals
 from fhir.serializers import serialize_fhir_bundle
@@ -19,38 +20,20 @@ from graph.llm_client import companion_reply, describe_provider, explain_image, 
 from graph.mock_data import MOCK_HOSPITALS, simulate_live_telemetry
 from graph.pipeline import run_pipeline, stream_pipeline
 from graph.scoring import rank_hospitals
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, get_optional_user
 from app.core.constants import DEMO_NOTICE, PROVIDER_BUSY, SAFE_ERROR, SAFE_EMERGENCY_ERROR
 from app.security.authentication import CurrentUser
+from app.security.rate_limit import enforce_rate_limit
 from app.security.sanitization import PROMPT_INJECTION_RULES, clean_text
+from app.infrastructure.database.session import get_db
 from app.security.uploads import decode_image_b64
+from app.services.emergency_service import start_emergency
 from services.pdf_referral import generate_referral_pdf
 from services.sessions import persist_session
 
 router = APIRouter()
 
-# Simple in-memory token bucket: 30 req / 60s / IP
-_RATE: dict[str, list[float]] = {}
-_RATE_LIMIT = 30
-_RATE_WINDOW = 60.0
 _NEARBY_CACHE: dict[tuple, tuple[float, dict]] = {}
-
-
-def _client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
-
-
-def enforce_rate_limit(request: Request) -> None:
-    ip = _client_ip(request)
-    now = time.time()
-    bucket = [stamp for stamp in _RATE.get(ip, []) if now - stamp < _RATE_WINDOW]
-    if len(bucket) >= _RATE_LIMIT:
-        raise HTTPException(status_code=429, detail="Too many requests. Please wait a moment.")
-    bucket.append(now)
-    _RATE[ip] = bucket
 
 
 class LocationBody(BaseModel):
@@ -226,26 +209,57 @@ async def triage_sync(payload: TriageStreamRequest, request: Request):
 
 
 @router.post("/emergency/sos")
-async def emergency_sos(payload: SosRequest, request: Request):
+async def emergency_sos(
+    payload: SosRequest,
+    request: Request,
+    user: CurrentUser | None = Depends(get_optional_user),
+    db: Session = Depends(get_db),
+):
     enforce_rate_limit(request)
     text = payload.input.strip() or "Emergency SOS — I need help"
-    result = await run_pipeline(
-        text,
-        {"lat": payload.location.lat, "lng": payload.location.lng},
-        payload.session_id or str(uuid.uuid4()),
-        vitals=payload.vitals,
-        patient=payload.patient,
-    )
-    result["is_emergency"] = True
-    persist_session(result)
-    public = _public_state(result)
+    session_id = payload.session_id or str(uuid.uuid4())
+    try:
+        result = await run_pipeline(
+            text,
+            {"lat": payload.location.lat, "lng": payload.location.lng},
+            session_id,
+            vitals=payload.vitals,
+            patient=payload.patient,
+        )
+        result["is_emergency"] = True
+        persist_session(result)
+        public = _public_state(result)
+    except Exception:
+        public = _public_state({
+            "session_id": session_id,
+            "raw_input": text,
+            "is_emergency": True,
+            "esi_level": 1,
+            "disclaimer": SAFE_EMERGENCY_ERROR,
+        })
     hospital = (public.get("selected_facility") or {}).get("name")
+    sathi = None
+    if user:
+        try:
+            sathi = start_emergency(
+                db,
+                user,
+                text=text,
+                source=payload.source or "senior",
+                requested_by=payload.requested_by or "",
+                lat=payload.location.lat,
+                lng=payload.location.lng,
+                hospital_name=hospital or "",
+            )
+        except Exception:
+            sathi = None
+    public["sathiEmergency"] = sathi
     public["dispatch"] = {
         "service": "108",
         "message": "Emergency help is active. Please call 108 now.",
         "nearest_trauma": hospital,
         "recommended_hospital": hospital,
-        "ambulance_dispatched": True,
+        "ambulance_dispatched": False,
         "notice": DEMO_NOTICE,
         "source": payload.source or "senior",
         "requested_by": payload.requested_by or "",

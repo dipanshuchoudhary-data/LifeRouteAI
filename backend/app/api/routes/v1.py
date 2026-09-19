@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, require_rate_limit
 from app.application.dto import ChatRequest, EmergencyStartRequest, ExplainRequest, FamilyNotifyRequest
 from app.application.use_cases import (
     ChatWithSathiUseCase,
@@ -39,6 +39,7 @@ def sathi_chat(
     request: ChatRequest,
     user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
+    _: None = Depends(require_rate_limit),
 ):
     return ChatWithSathiUseCase().execute(db, user, request)
 
@@ -48,6 +49,7 @@ def sathi_explain(
     request: ExplainRequest,
     user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
+    _: None = Depends(require_rate_limit),
 ):
     return ExplainDocumentUseCase().execute(db, user, request)
 
@@ -65,6 +67,7 @@ def family_message(
     request: FamilyNotifyRequest,
     user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
+    _: None = Depends(require_rate_limit),
 ):
     return NotifyFamilyUseCase().execute(db, user, request)
 
@@ -74,6 +77,7 @@ def create_emergency(
     request: EmergencyStartRequest,
     user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),
+    _: None = Depends(require_rate_limit),
 ):
     return TriggerEmergencyUseCase().execute(db, user, request)
 
@@ -97,6 +101,10 @@ def close_emergency(
 
 
 @router.post("/speech/tts")
-def speak(request: ChatRequest, user: CurrentUser = Depends(get_current_user)):
+def speak(
+    request: ChatRequest,
+    user: CurrentUser = Depends(get_current_user),
+    _: None = Depends(require_rate_limit),
+):
     audio = get_tts_provider().speak(request.message)
     return {"text": audio.text, "provider": audio.provider, "simulated": audio.simulated, "note": audio.note}
