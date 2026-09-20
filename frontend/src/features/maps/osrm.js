@@ -1,9 +1,3 @@
-export function slicePath(path, t) {
-  if (!path?.length) return []
-  const count = Math.max(2, Math.round(path.length * Math.max(0.02, Math.min(1, t))))
-  return path.slice(0, count)
-}
-
 export function geodesic(from, to, steps = 48) {
   const path = []
   for (let i = 0; i <= steps; i += 1) {

@@ -95,11 +95,10 @@ html { scroll-behavior: smooth; }
 .lr-nav-tabs { display: flex; align-items: center; gap: 2px; overflow-x: auto; max-width: min(64vw, 820px); scrollbar-width: none; }
 .lr-nav-tabs::-webkit-scrollbar { display: none; }
 .lr-nav-link {
-  position: relative; padding: 8px 14px; font-size: 14px; font-weight: 500;
+  position: relative; padding: 8px 16px; font-size: 14px; font-weight: 500;
   color: var(--text-muted); text-decoration: none; border-radius: 8px;
   transition: color 0.2s; cursor: pointer; background: none; border: none;
   font-family: var(--font-body);
-  display: inline-flex; align-items: center; gap: 6px;
 }
 .lr-nav-link:hover, .lr-nav-link.active { color: white; }
 .lr-nav-link::after {
