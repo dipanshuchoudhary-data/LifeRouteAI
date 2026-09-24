@@ -3,7 +3,13 @@ import { Marker, Polyline, Tooltip } from 'react-leaflet'
 import SatelliteMap from './SatelliteMap'
 import { ambulanceIcon, pinIcon } from './markers'
 import { hospitalLatLng, DEFAULT_ORIGIN } from './coords'
-import { fetchBestRoutes, pointAlong, slicePath } from './osrm'
+import { fetchBestRoutes, pointAlong } from './osrm'
+
+function slicePath(path, t) {
+  if (!path?.length) return []
+  const count = Math.max(2, Math.round(path.length * Math.max(0.02, t)))
+  return path.slice(0, count)
+}
 
 function RouteScene({ from, dest, hospital, alternate, visible, basemap, className, tone, embedded }) {
   const ops = tone === 'ops'

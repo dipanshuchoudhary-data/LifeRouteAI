@@ -1,10 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, Navigation, Phone } from 'lucide-react'
+import RouteFinderMap from '../maps/RouteFinderMap'
 import FacilityMap from '../maps/FacilityMap'
 import { useLifeRouteStore } from '../../stores/useLifeRouteStore'
 import { useProfileStore } from '../../stores/useProfileStore'
 import useLiveFacilities from '../../hooks/useLiveFacilities'
-import { INCIDENT_STAGES, STAGE_MS, incidentClock } from '../../lib/incidentProgress'
+
+const STAGES = [
+  { id: 'received', label: 'Received' },
+  { id: 'classified', label: 'Classified' },
+  { id: 'ambulance', label: 'Ambulance' },
+  { id: 'hospital', label: 'Hospital' },
+  { id: 'routing', label: 'Routing' },
+  { id: 'arrival', label: 'Arrival' },
+]
 
 function callState(index, tick) {
   if (tick < 1 + index) return 'Queued'
@@ -36,61 +45,55 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
   const origin = useLifeRouteStore((s) => s.location)
   const searchQuery = useLifeRouteStore((s) => s.searchQuery)
   const esiLevel = useLifeRouteStore((s) => s.esiLevel)
+  const status = useLifeRouteStore((s) => s.status)
   const sessionId = useLifeRouteStore((s) => s.sessionId)
   const profile = useProfileStore((s) => s.profile)
   const contacts = profile.emergencyContacts || []
   const { hospitals, ambulances } = useLiveFacilities(origin)
-  const [elapsed, setElapsed] = useState(0)
   const [tick, setTick] = useState(0)
   const startedAt = useRef(Date.now())
 
   useEffect(() => {
-    startedAt.current = Date.now()
-    setElapsed(0)
-    setTick(0)
-    const clockId = setInterval(() => setElapsed(Date.now() - startedAt.current), 200)
-    const callId = setInterval(() => setTick((n) => n + 1), 1400)
-    return () => {
-      clearInterval(clockId)
-      clearInterval(callId)
-    }
+    const id = setInterval(() => setTick((n) => n + 1), 1400)
+    return () => clearInterval(id)
   }, [])
 
-  const progress = incidentClock(elapsed)
   const hospital = result?.matchedHospital
+  const alternate = result?.rankedHospitals?.find((row) => row.id !== hospital?.id) || result?.rankedHospitals?.[1]
   const unit = result?.ambulance || ambulances.find((row) => row.status === 'en-route' || row.status === 'assigned') || ambulances[0]
+  const ready = Boolean(result && hospital)
   const esi = result?.esiLevel || esiLevel || 1
   const critical = esi <= 2
   const family = useMemo(
     () => contacts.filter((row) => row.name || row.phone),
     [contacts],
   )
+  const currentIndex = !result ? (unit ? 3 : 2) : 4
+  const inProgress = status === 'streaming' || (status === 'emergency' && !ready)
   const diverted = Boolean(hospital?.divert)
-  const assigned = progress.assigned && Boolean(unit)
-  const hospitalReady = progress.hospitalReady && Boolean(hospital)
-  const accepted = hospitalReady && !diverted
-  const routing = progress.routing
-  const routeReady = progress.routeProgress >= 1
+  const accepted = ready && !diverted
   const patientName = profile.name?.trim() || 'Unknown identity'
   const patientMeta = [profile.sex, profile.age ? `~${profile.age} years` : null].filter(Boolean).join(' · ') || 'Identity not on file'
   const location = placeLabel(origin, profile.city)
-  const facilityEta = routeReady
-    ? (result?.route?.duration || (hospital?.travelMinutes ? `${hospital.travelMinutes} min` : '—'))
-    : routing
-      ? 'Calculating'
-      : '—'
-  const ambStatus = routeReady ? 'En route' : assigned ? 'Assigned' : 'Matching'
+  const facilityEta = result?.route?.duration || (hospital?.travelMinutes ? `${hospital.travelMinutes} min` : '—')
+  const ambStatus = ready ? 'En route' : inProgress ? 'Dispatching' : 'Assigned'
+  const stageHint = STAGES[currentIndex]?.label === 'Routing'
+    ? 'En route to hospital'
+    : STAGES[currentIndex]?.label === 'Ambulance'
+      ? 'Dispatching nearby unit'
+      : STAGES[currentIndex]?.label === 'Hospital'
+        ? 'Matching receiving facility'
+        : 'Incident in progress'
   const caseId = sessionId ? `ESI-${esi} · ${sessionId.slice(0, 8).toUpperCase()}` : `ESI-${esi}`
   const tags = (hospital?.tags || []).join(' ').toLowerCase()
   const traumaOk = /trauma|emergency|er/.test(tags) || esi <= 2
   const icuOk = (hospital?.icuFree ?? hospital?.beds ?? 0) > 0
-  const liveHospitals = (result?.rankedHospitals?.length ? result.rankedHospitals : hospitals).slice(0, 10)
 
   return (
     <div className={`ops-live${critical ? ' is-critical' : ''}`}>
       <header className="ops-live-head">
         {onBack ? (
-          <button type="button" className="ops-btn-ghost" onClick={onBack}>← Home</button>
+          <button type="button" className="ops-btn-ghost" onClick={onBack}>← Back</button>
         ) : null}
         <div className="ops-live-head-main">
           <div className="ops-live-head-meta">
@@ -103,40 +106,38 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
         <a className="ops-sos ops-live-sos" href="tel:108"><Phone size={14} /> Call 108</a>
       </header>
 
-      {diverted && hospitalReady && (
+      {diverted && (
         <div className="ops-live-alert" role="status">
           Hospital divert — alternate facility is ready.
         </div>
       )}
 
       <section className="ops-live-map-frame" aria-label="Live route map">
-        <FacilityMap
-          origin={origin}
-          hospitals={liveHospitals}
-          ambulances={ambulances.slice(0, 6)}
-          selectedId={hospitalReady ? hospital?.id : undefined}
-          heightClass="ops-live-map-canvas"
-          basemap="roads"
-          originLabel="Patient"
-          destination={hospitalReady ? hospital : null}
-          routeProgress={progress.routeProgress}
-        />
+        {ready ? (
+          <RouteFinderMap
+            origin={origin}
+            hospital={hospital}
+            alternate={alternate}
+            visible
+            basemap="roads"
+            className="ops-live-map-canvas"
+            tone="ops"
+            embedded
+          />
+        ) : (
+          <FacilityMap
+            origin={origin}
+            hospitals={hospitals.slice(0, 4)}
+            ambulances={ambulances.slice(0, 4)}
+            heightClass="ops-live-map-canvas"
+            basemap="roads"
+            originLabel="Patient"
+          />
+        )}
         <div className="ops-live-legend">
           <span><i className="pt" /> Patient</span>
           <span><i className="amb" /> Ambulance</span>
           <span><i className="er" /> Hospital</span>
-        </div>
-        <div className="ops-live-hud">
-          <span>
-            {routeReady
-              ? 'Live route ready'
-              : routing
-                ? 'Calculating live route…'
-                : hospitalReady
-                  ? 'Matching corridor'
-                  : 'Locating nearby hospitals'}
-          </span>
-          {routeReady ? <strong>{result?.route?.duration || facilityEta}</strong> : null}
         </div>
       </section>
 
@@ -153,43 +154,51 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
         </div>
         <div className="ops-live-row">
           <span className="ops-live-label">Ambulance</span>
-          <strong>{assigned ? (unit?.callSign || 'Matching unit') : 'Matching unit'}</strong>
-          <p className="ops-live-meta">{assigned ? `${ambStatus} · ETA ${unit?.eta || '—'}` : 'Nearest ALS being assigned'}</p>
-          <Flag tone={assigned ? 'ok' : 'warn'}>{ambStatus}</Flag>
+          <strong>{unit?.callSign || 'Matching unit'}</strong>
+          <p className="ops-live-meta">{unit ? `${ambStatus} · ETA ${unit.eta}` : 'Nearest ALS being assigned'}</p>
+          <Flag tone={ready ? 'ok' : 'warn'}>{ambStatus}</Flag>
         </div>
         <div className="ops-live-row">
           <span className="ops-live-label">Hospital</span>
-          <strong>{hospitalReady ? hospital.name : 'Matching facility'}</strong>
-          <p className="ops-live-meta">{hospitalReady ? hospital.city : 'Trauma-capable ER'}</p>
-          <Flag tone={accepted ? 'ok' : diverted && hospitalReady ? 'warn' : 'muted'}>
-            {accepted ? 'Accepted' : diverted && hospitalReady ? 'Divert' : 'Matching'}
+          <strong>{hospital?.name || 'Matching facility'}</strong>
+          <p className="ops-live-meta">{hospital ? hospital.city : 'Trauma-capable ER'}</p>
+          <Flag tone={accepted ? 'ok' : diverted ? 'warn' : 'muted'}>
+            {accepted ? 'Accepted' : diverted ? 'Divert' : 'Matching'}
           </Flag>
         </div>
         <div className="ops-live-row ops-live-row-eta">
           <span className="ops-live-label">Facility ETA</span>
           <strong className="ops-live-eta">{facilityEta}</strong>
-          <p className="ops-live-meta">{progress.hint}</p>
+          <p className="ops-live-meta">{result?.route?.traffic ? `Traffic ${result.route.traffic}` : stageHint}</p>
         </div>
       </aside>
 
       <section className="ops-live-progress" aria-label="Incident progress">
         <div className="ops-live-progress-head">
           <p className="ops-live-panel-kicker">Incident progress</p>
-          <span>{progress.hint}</span>
+          <span>{stageHint}</span>
         </div>
         <ol className="ops-live-steps">
-          {INCIDENT_STAGES.map((stage, index) => {
-            const state = index < progress.index ? 'done' : index === progress.index ? 'active' : ''
-            const stamp = index < progress.index || (index === progress.index && index < INCIDENT_STAGES.length - 1)
-              ? clock(startedAt.current, index * STAGE_MS)
-              : index === progress.index
-                ? 'Now'
-                : '—'
+          {STAGES.map((stage, index) => {
+            const state = index < currentIndex ? 'done' : index === currentIndex ? 'active' : ''
+            const stamp = index === 0
+              ? clock(startedAt.current, 0)
+              : index === 1
+                ? clock(startedAt.current, 8000)
+                : index === 2 && unit
+                  ? clock(startedAt.current, 18000)
+                  : index === 3 && ready
+                    ? clock(startedAt.current, 26000)
+                    : index === 4 && ready
+                      ? clock(startedAt.current, 32000)
+                      : state === 'active'
+                        ? (inProgress ? 'Now' : 'Live')
+                        : ''
             return (
               <li key={stage.id} className={state}>
                 <i>{state === 'done' ? <Check size={11} /> : null}</i>
                 <strong>{stage.label}</strong>
-                <span>{stamp}</span>
+                <span>{stamp || '—'}</span>
               </li>
             )
           })}
@@ -198,11 +207,11 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
 
       <article className="ops-live-panel ops-live-amb">
         <p className="ops-live-panel-kicker">Ambulance</p>
-        {assigned ? (
+        {unit ? (
           <>
             <h2>{unit.callSign}</h2>
             <p className="ops-live-meta">{unit.type === 'ALS' ? 'Advanced Life Support' : 'Basic Life Support'}</p>
-            <Flag tone={routeReady ? 'ok' : 'warn'}>{ambStatus}</Flag>
+            <Flag tone={ready ? 'ok' : 'warn'}>{ambStatus}</Flag>
             <div className="ops-live-metrics">
               <div>
                 <span>ETA to patient</span>
@@ -225,7 +234,7 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
 
       <article className="ops-live-panel ops-live-dest">
         <p className="ops-live-panel-kicker">Destination</p>
-        {hospitalReady ? (
+        {hospital ? (
           <>
             <h2>{hospital.name}</h2>
             <Flag tone={accepted ? 'ok' : 'warn'}>{accepted ? 'Hospital accepted' : diverted ? 'Divert — alternate ready' : 'Confirming'}</Flag>
@@ -236,14 +245,14 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
               </div>
               <div>
                 <span>Distance</span>
-                <b>{routeReady ? (result?.route?.distance || hospital.distance || '—') : '—'}</b>
+                <b>{result?.route?.distance || hospital.distance || '—'}</b>
               </div>
               <div>
                 <span>Traffic</span>
-                <b>{routeReady ? (result?.route?.traffic || 'Live') : 'Reading'}</b>
+                <b>{result?.route?.traffic || 'Live'}</b>
               </div>
             </div>
-            <p className="ops-live-soft">{routeReady ? (result?.route?.via || 'Fastest live corridor') : 'Building the driving path'}</p>
+            <p className="ops-live-soft">{result?.route?.via || 'Fastest live corridor'}</p>
             <div className="ops-live-match">
               <span className={traumaOk ? 'ok' : ''}>Trauma {traumaOk ? '✓' : '—'}</span>
               <span className={icuOk ? 'ok' : ''}>ICU {icuOk ? '✓' : '—'}</span>
@@ -261,7 +270,7 @@ export default function EmergencyTrack({ result, onBack, onOpenDetails, onNaviga
                 </a>
               ) : null}
               {hospital.contact ? <a className="ops-live-link" href={`tel:${hospital.contact}`}>Call facility</a> : null}
-              {onOpenDetails && routeReady ? (
+              {onOpenDetails && ready ? (
                 <button type="button" className="ops-live-link" onClick={onOpenDetails}>Full referral</button>
               ) : null}
             </div>

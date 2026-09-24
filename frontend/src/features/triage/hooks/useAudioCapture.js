@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import { PROVIDER_BUSY, transcribeVoice } from '../../../lib/api'
+import { transcribeVoice } from '../../../lib/api'
 import { mediaBlobToWav } from '../../../lib/wav'
 
 const MIME_CANDIDATES = [
@@ -53,7 +53,6 @@ export function useAudioCapture({ onTranscript, onError, language = 'en' } = {})
     const spoken = spokenRef.current.trim()
     try {
       let voiceText = ''
-      let voiceFailed = false
       if (blob && blob.size >= 1500) {
         try {
           let payload = blob
@@ -65,13 +64,11 @@ export function useAudioCapture({ onTranscript, onError, language = 'en' } = {})
           const result = await transcribeVoice(payload, { timeoutMs: spoken ? 3500 : 10000 })
           voiceText = (result.text || '').trim()
         } catch {
-          voiceFailed = true
           voiceText = ''
         }
       }
       const text = voiceText || spoken
       if (text) onTranscript?.(text)
-      else if (voiceFailed) onError?.(PROVIDER_BUSY)
       else onError?.('No speech captured. Hold the mic, speak clearly, then tap again to stop.')
     } finally {
       setIsTranscribing(false)

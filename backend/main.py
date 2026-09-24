@@ -1,6 +1,6 @@
 """
-Sathi AI — FastAPI application.
-Companion use cases live in app/. LifeRoute hospital routing stays in graph/.
+LifeRoute AI — FastAPI Application
+Main entry point with all API endpoints.
 Run: uvicorn main:app --reload --port 8000
 """
 
@@ -17,12 +17,6 @@ import yaml
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-
-from app.api.routes.v1 import router as v1_router
-from app.core.config import settings
-from app.core.constants import SAFE_ERROR
-from app.infrastructure.database.session import init_db
-from app.middleware import RequestContextMiddleware, register_exception_handlers
 
 from models.schemas import (
     NavigateRequest,
@@ -47,12 +41,13 @@ from api.v2.router import router as v2_router
 # ---------------------------------------------------------------------------
 
 app = FastAPI(
-    title="Sathi AI",
+    title="LifeRoute AI",
     description=(
-        "Daily companion for older adults: voice, explain, family, and emergency assistance. "
-        "Hospital matching uses the LifeRoute engine. High-impact actions require confirmation."
+        "Intelligent healthcare navigation platform with an open assistant connector. "
+        "Any LLM provider or agent framework can drive the pipeline through REST "
+        "endpoints or tool/function calling — no vendor SDK required."
     ),
-    version="3.0.0",
+    version="2.0.0",
     openapi_tags=[
         {"name": "Navigation", "description": "Core patient navigation pipeline"},
         {"name": "Assistant", "description": "Conversational entry points for any LLM client"},
@@ -63,25 +58,30 @@ app = FastAPI(
 )
 
 
-app.add_middleware(RequestContextMiddleware)
+def _cors_origins() -> list[str]:
+    origins = [
+        os.getenv("FRONTEND_URL", "http://localhost:5173"),
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://localhost",
+        "http://127.0.0.1",
+        "http://127.0.0.1:5173",
+    ]
+    extra = os.getenv("CORS_ORIGINS", "")
+    origins.extend(item.strip() for item in extra.split(",") if item.strip())
+    return list(dict.fromkeys(origins))
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=_cors_origins(),
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "X-Sathi-Session", "X-Request-Id"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-register_exception_handlers(app)
-app.include_router(v1_router, prefix="/api/v1", tags=["Sathi"])
-app.include_router(v1_router, prefix="/v1", tags=["Sathi"])
 app.include_router(v2_router, prefix="/api/v2", tags=["Clinical"])
 app.include_router(v2_router, prefix="/v2", tags=["Clinical"])
-
-
-@app.on_event("startup")
-def _startup() -> None:
-    init_db()
 
 
 def _connector_base_url() -> str:
@@ -109,8 +109,9 @@ async def navigate(request: NavigateRequest):
         location = {"lat": request.location.lat, "lng": request.location.lng}
         result = await run_pipeline(request.input.strip(), location)
         return NavigateResponse(**_pipeline_to_response(result, request.input))
-    except Exception:
-        raise HTTPException(status_code=500, detail=SAFE_ERROR)
+    except Exception as e:
+        print(f"[API] Navigate error: {e}")
+        raise HTTPException(status_code=500, detail=f"Pipeline execution failed: {str(e)}")
 
 
 # ---------------------------------------------------------------------------
@@ -147,19 +148,20 @@ async def assistant_chat(request: AssistantTurnRequest):
 
         return JSONResponse(content=result)
 
-    except Exception:
+    except Exception as e:
+        print(f"[API] Assistant error: {e}")
         if request.response_format == "json":
             return AssistantChatResponse(
                 type="message",
                 text="I'm sorry, I encountered an error. Please try again or call 108 if urgent.",
-                disclaimer="Sathi provides navigation guidance only. It is not a replacement for 108.",
+                disclaimer="LifeRoute AI provides navigation guidance only.",
             )
         return JSONResponse(
             content={
                 "type": "message",
                 "role": "assistant",
                 "text": "I'm sorry, I encountered an error. Please try again or call 108 if urgent.",
-                "data": {"error": SAFE_ERROR},
+                "data": {"error": str(e)},
             }
         )
 
