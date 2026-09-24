@@ -6,6 +6,7 @@ This folder explains how the product works and how to run it. The root [README](
 
 | Document | What it covers |
 |----------|----------------|
+| [Hackathon — live links](HACKATHON.md) | Deployed frontend and backend URLs |
 | [Product](PRODUCT.md) | Problem, who it is for, screens, and what LifeRoute does **not** claim |
 | [Getting started](GETTING_STARTED.md) | Local setup, environment, demo flow |
 | [Architecture](ARCHITECTURE.md) | Client, FastAPI, LangGraph fan-out, data |

@@ -1,5 +1,12 @@
 # Deployment
 
+Live hackathon URLs are in [HACKATHON.md](HACKATHON.md).
+
+| What | URL |
+|------|-----|
+| Frontend | https://life-route-ai.vercel.app |
+| Backend | https://liferouteai.onrender.com |
+
 ## Secrets
 
 | Keep server-side | Safe to expose |

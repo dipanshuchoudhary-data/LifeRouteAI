@@ -27,6 +27,10 @@
 [![Bilingual](https://img.shields.io/badge/Language-EN_%7C_%E0%A4%B9%E0%A4%BF%E0%A4%82-0F766E?style=flat-square)]()
 [![ESI](https://img.shields.io/badge/ESI-E1--E5-12263A?style=flat-square)]()
 
+<br/>
+
+**Live** · [Frontend](https://life-route-ai.vercel.app) · [Backend](https://liferouteai.onrender.com) · [Health](https://liferouteai.onrender.com/health) · [Hackathon card](docs/HACKATHON.md)
+
 </div>
 
 ---
@@ -68,6 +72,7 @@ Longer guides live in [`docs/`](docs/README.md). Start there if you are running 
 | [API](docs/API.md) | Triage, SOS, voice, nearby, FHIR PDF |
 | [Safety](docs/SAFETY.md) | Sentinel, 108, chart Save |
 | [Deployment](docs/DEPLOYMENT.md) | Proxy, secrets, mock mode |
+| [Hackathon — live links](docs/HACKATHON.md) | Vercel frontend + Render API |
 
 ---
 
