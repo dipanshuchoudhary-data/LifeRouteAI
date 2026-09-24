@@ -35,22 +35,39 @@
 
 | # | Section |
 |---|---------|
-| 1 | [Study — why navigation fails](#study--why-navigation-fails) |
-| 2 | [What LifeRoute does](#what-liferoute-does) |
-| 3 | [What we upgraded](#what-we-upgraded) |
-| 4 | [Product map](#product-map) |
-| 5 | [System architecture](#system-architecture) |
-| 6 | [LangGraph pipeline](#langgraph-pipeline) |
-| 7 | [ESI and scoring](#esi-and-scoring) |
-| 8 | [Live operations](#live-operations) |
-| 9 | [Blood and donors](#blood-and-donors) |
-| 10 | [LLM and voice](#llm-and-voice) |
-| 11 | [API](#api) |
-| 12 | [Tech stack](#tech-stack) |
-| 13 | [Project structure](#project-structure) |
-| 14 | [Quick start](#quick-start) |
-| 15 | [Safety](#safety) |
-| 16 | [License](#license) |
+| 1 | [Project documentation](#project-documentation) |
+| 2 | [Study — why navigation fails](#study--why-navigation-fails) |
+| 3 | [What LifeRoute does](#what-liferoute-does) |
+| 4 | [What we upgraded](#what-we-upgraded) |
+| 5 | [Product map](#product-map) |
+| 6 | [System architecture](#system-architecture) |
+| 7 | [LangGraph pipeline](#langgraph-pipeline) |
+| 8 | [ESI and scoring](#esi-and-scoring) |
+| 9 | [Live operations](#live-operations) |
+| 10 | [Blood and donors](#blood-and-donors) |
+| 11 | [LLM and voice](#llm-and-voice) |
+| 12 | [API](#api) |
+| 13 | [Tech stack](#tech-stack) |
+| 14 | [Project structure](#project-structure) |
+| 15 | [Quick start](#quick-start) |
+| 16 | [Safety](#safety) |
+| 17 | [License](#license) |
+
+---
+
+## Project documentation
+
+Longer guides live in [`docs/`](docs/README.md). Start there if you are running the console, wiring the API, or explaining ESI scoring.
+
+| Guide | Topic |
+|-------|--------|
+| [Product](docs/PRODUCT.md) | Problem, screens, what LifeRoute does not claim |
+| [Getting started](docs/GETTING_STARTED.md) | Local API + Vite, env, smoke tests |
+| [Architecture](docs/ARCHITECTURE.md) | Client, FastAPI, LangGraph fan-out |
+| [ESI and scoring](docs/ESI_AND_SCORING.md) | E1–E5 and the five-factor hospital score |
+| [API](docs/API.md) | Triage, SOS, voice, nearby, FHIR PDF |
+| [Safety](docs/SAFETY.md) | Sentinel, 108, chart Save |
+| [Deployment](docs/DEPLOYMENT.md) | Proxy, secrets, mock mode |
 
 ---
 
@@ -521,6 +538,7 @@ Interactive docs: `http://localhost:8000/docs`
 ```
 hack/
 ├── README.md
+├── docs/                         product, architecture, API, safety, deploy
 ├── .env.example
 ├── backend/
 │   ├── main.py
